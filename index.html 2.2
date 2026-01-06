@@ -3,82 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Statzy - Ultra Compact</title>
+    <title>Statzy - Elite Compact</title>
     <style>
         :root { 
-            --bg: #0a0a0a; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
-            --padd: 10px; --fs-base: 15px; --sb-h: 22px; --row-h: 40px;
+            --bg: #000; --card: #161618; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
+            --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px;
         }
 
-        /* ULTRA-KOMPAKTA LÄGEN */
-        body.zoom-compact { --padd: 4px; --fs-base: 12px; --sb-h: 16px; --row-h: 28px; }
-        body.zoom-tiny { --padd: 1px; --fs-base: 10px; --sb-h: 12px; --row-h: 20px; }
+        /* ELITE COMPACT MODES */
+        body.zoom-compact { --padd: 2px; --fs-base: 12px; --sb-h: 16px; --row-h: 22px; --prob-h: 18px; }
+        body.zoom-tiny { --padd: 0px; --fs-base: 10px; --sb-h: 12px; --row-h: 16px; --prob-h: 14px; }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 5px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        /* Setup Screen */
-        #setup { text-align: center; padding-top: 40px; animation: fadeIn 0.4s; }
-        .version-tag { font-size: 10px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
-        .player-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; }
-        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
-        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 12px; border-radius: 10px; font-weight: bold; }
-        .btn-main { background: var(--accent); border: none; padding: 16px 20px; border-radius: 14px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 300px; font-size: 1.1em; }
+        /* Setup */
+        #setup { text-align: center; padding-top: 20px; }
+        .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 5px 0; }
+        input[type="text"] { background: #1c1c1e; border: 1px solid #333; color: white; padding: 8px; border-radius: 6px; width: 60%; font-size: 14px; }
+        .btn-main { background: var(--accent); border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; color: #000; width: 80%; font-size: 1em; }
 
-        /* Game Header */
-        header { position: sticky; top: 0; background: var(--bg); padding: 4px 0; z-index: 10; border-bottom: 1px solid #222; }
-        .prob-bar { display: flex; height: 24px; background: #111; border-radius: 12px; overflow: hidden; margin: 4px 0; border: 1px solid #333; }
-        .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: 24px; font-weight: 900; }
-        #winner-banner { display: none; background: #ffd700; color: #000; padding: 8px; text-align: center; font-weight: 900; border-radius: 8px; margin-bottom: 5px; font-size: 12px; }
+        /* Game Header - Slimmer */
+        header { position: sticky; top: 0; background: var(--bg); padding: 2px 0; z-index: 10; }
+        .prob-bar { display: flex; height: var(--prob-h); background: #111; border-radius: 4px; overflow: hidden; margin: 2px 0; border: 1px solid #222; }
+        .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: calc(var(--fs-base) - 1px); line-height: var(--prob-h); font-weight: 900; }
+        #winner-banner { display: none; background: #ffd700; color: #000; padding: 4px; text-align: center; font-weight: 900; border-radius: 4px; margin-bottom: 2px; font-size: 11px; }
 
-        /* Tables - Thinner Rows */
+        /* Table - Maximum Density */
         #score-container { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        th { padding: 4px 2px; font-size: 0.9em; color: #555; text-transform: uppercase; }
-        td { padding: var(--padd) 2px; border-bottom: 1px solid #111; text-align: center; height: var(--row-h); }
-        td:first-child { text-align: left; width: 35%; font-weight: 700; color: #777; padding-left: 6px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { padding: 2px; font-size: 0.8em; color: #444; text-transform: uppercase; border-bottom: 1px solid #222; }
+        td { padding: var(--padd) 1px; border-bottom: 1px solid #111; text-align: center; height: var(--row-h); overflow: hidden; }
+        td:first-child { text-align: left; width: 30%; font-weight: 700; color: #666; padding-left: 4px; white-space: nowrap; }
         
-        .score-box { background: #161618; border-radius: 5px; padding: 4px 0; min-height: var(--sb-h); border: 1px solid #2c2c2e; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 2px); line-height: var(--sb-h); }
-        .sum-row { background: #111; color: #aaa; font-size: 0.85em; }
-        .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
+        .score-box { background: #111; border-radius: 3px; padding: 0; min-height: var(--sb-h); height: var(--sb-h); border: 1px solid #222; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
+        .sum-row { background: #0a0a0a; color: #888; font-size: 0.85em; }
+        .total-row { background: #000; border-top: 1px solid var(--accent); color: var(--accent); font-weight: 900; }
 
-        /* TV LÄGE (LANDSCAPE) */
-        body.mode-tv #game { max-width: 1400px; margin: 0 auto; }
-        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        body.mode-tv .game-footer { display: flex; justify-content: center; align-items: center; gap: 20px; }
+        /* TV MODE - Landscape Power Grid */
+        body.mode-tv #game { width: 100vw; height: 100vh; display: flex; flex-direction: column; padding: 5px; box-sizing: border-box; }
+        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-grow: 1; align-items: start; }
+        body.mode-tv table { margin: 0; }
+        body.mode-tv .game-footer { padding: 5px; display: flex; gap: 10px; justify-content: center; }
+        body.mode-tv .settings-footer { padding: 5px 0 10px 0; margin: 0; }
 
-        /* Settings in Footer */
-        .settings-footer { margin-top: 20px; padding: 15px 10px 60px 10px; border-top: 1px solid #1a1a1a; text-align: center; }
-        .settings-title { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .zoom-toolbar { display: inline-flex; background: #111; padding: 4px; border-radius: 10px; gap: 4px; }
-        .zoom-btn { background: none; border: none; color: #555; padding: 8px 12px; border-radius: 7px; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .zoom-btn.active { background: var(--accent); color: #000; }
-        .tv-toggle { display: block; margin: 10px auto; color: #666; border: 1px solid #222; background: #000; padding: 10px; border-radius: 8px; font-size: 11px; }
-        .tv-toggle.active { border-color: var(--accent); color: var(--accent); }
-
-        /* Custom Keypads */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 90; backdrop-filter: blur(10px); }
-        #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #161618; z-index: 100; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; }
-        .modal-title { margin-bottom: 15px; font-weight: 800; color: var(--accent); text-align: center; font-size: 1.1em; }
-        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; }
-        .clear-link { display: block; text-align: center; margin-top: 20px; color: #555; font-size: 13px; text-decoration: underline; }
-        #num-display { background: #000; color: var(--accent); font-size: 40px; text-align: center; padding: 10px; border-radius: 15px; margin-bottom: 15px; border: 2px solid #333; }
-        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        /* Keypad Modal */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 90; }
+        #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #161618; z-index: 100; border-radius: 15px 15px 0 0; padding: 15px; box-sizing: border-box; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .quick-btn { background: #2c2c2e; padding: 12px; border-radius: 8px; text-align: center; font-weight: 800; font-size: 18px; color: white; }
+        .clear-link { display: block; text-align: center; margin-top: 15px; color: #444; font-size: 12px; text-decoration: underline; }
+        #num-display { background: #000; color: var(--accent); font-size: 32px; text-align: center; padding: 8px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; }
+        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .ok-btn { background: var(--win) !important; color: #000 !important; grid-column: span 2; }
 
-        .game-footer { padding: 10px; text-align: center; }
-        .btn-outline { background: none; border: 1px solid #222; color: #444; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .game-footer { padding: 10px 5px; text-align: center; }
+        .settings-footer { margin-top: 10px; padding-bottom: 40px; border-top: 1px solid #111; text-align: center; }
+        .zoom-toolbar { display: inline-flex; background: #111; padding: 2px; border-radius: 6px; gap: 2px; }
+        .zoom-btn { background: none; border: none; color: #444; padding: 6px 10px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; }
+        .zoom-btn.active { background: var(--accent); color: #000; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="zoom-normal">
 
 <div id="setup">
-    <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 2.0.0 ULTRA-COMPACT</div>
-    <br>
+    <h1 style="font-size: 3em; margin: 0; color: var(--accent); letter-spacing: -2px; font-weight: 900;">Statzy</h1>
     <div id="player-list"></div>
-    <button class="btn-outline" style="color: var(--accent); border-color: var(--accent); margin-top: 10px;" onclick="addPlayerField('')">+ SPELARE</button>
+    <button style="background:none; border:1px solid #333; color:#555; padding:8px; border-radius:8px; font-size:11px; margin-top:10px" onclick="addPlayerField('')">+ SPELARE</button>
     <br><br>
     <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
 </div>
@@ -95,31 +86,29 @@
     </div>
 
     <div class="game-footer">
-        <button class="btn-main" onclick="nextRound()">NÄSTA RUNDA</button>
-        <br>
-        <button class="btn-outline" style="margin-top:10px" onclick="if(confirm('Nollställ?')) resetEverything()">Avsluta</button>
+        <button class="btn-main" style="width:200px; padding:12px" onclick="nextRound()">NÄSTA RUNDA</button>
     </div>
 
     <div class="settings-footer">
-        <div class="settings-title">Zoom & Vy</div>
         <div class="zoom-toolbar">
             <button class="zoom-btn active" onclick="setZoom('normal', this)">Standard</button>
             <button class="zoom-btn" onclick="setZoom('compact', this)">Kompakt</button>
             <button class="zoom-btn" onclick="setZoom('tiny', this)">Minimal</button>
+            <button class="zoom-btn" id="tvBtn" onclick="toggleTV(this)">TV</button>
         </div>
-        <button class="tv-toggle" id="tvBtn" onclick="toggleTV()">TV-Läge / Liggande</button>
+        <br>
+        <button style="background:none; border:none; color:#222; font-size:9px; margin-top:10px" onclick="if(confirm('Nollställ allt?')) resetEverything()">Nollställ systemet</button>
     </div>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
 <div id="modal">
-    <div class="modal-title" id="modalTitle">Kategori</div>
+    <div class="modal-title" id="modalTitle" style="font-size:14px; color:#555; margin-bottom:10px; text-align:center;">Kategori</div>
     <div id="quick-pick-section">
         <div class="quick-grid" id="quickGrid"></div>
-        <div class="clear-link" onclick="setScoreAndClose(null)">Rensa ruta</div>
+        <div class="clear-link" onclick="setScoreAndClose(null)">Rensa</div>
     </div>
     <div id="numeric-section" style="display:none;">
-        <div id="err" style="color:red; font-size:11px; text-align:center; display:none; margin-bottom:5px;"></div>
         <div id="num-display">-</div>
         <div class="num-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
@@ -128,7 +117,7 @@
             <div class="quick-btn" style="background:#333" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
             <div class="quick-btn ok-btn" onclick="confirmNumeric()">KLAR</div>
         </div>
-        <div class="clear-link" onclick="setScoreAndClose(null)">Rensa ruta</div>
+        <div class="clear-link" onclick="setScoreAndClose(null)">Rensa</div>
     </div>
 </div>
 
@@ -162,9 +151,9 @@ function setZoom(mode, btn) {
     btn.classList.add('active');
 }
 
-function toggleTV() {
+function toggleTV(btn) {
     document.body.classList.toggle('mode-tv');
-    document.getElementById('tvBtn').classList.toggle('active');
+    btn.classList.toggle('active');
     renderBoard();
 }
 
@@ -173,7 +162,7 @@ function addPlayerField(name) {
     div.className = 'player-row';
     const isDefault = name.startsWith('Spelare ');
     div.innerHTML = `<input type="text" placeholder="${isDefault ? name : 'Namn'}" value="${isDefault ? '' : name}">
-        <button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
+        <button style="border:none; background:none; color:#333; font-size:10px;" onclick="this.parentElement.remove()">TA BORT</button>`;
     document.getElementById('player-list').appendChild(div);
 }
 
@@ -189,7 +178,7 @@ function startGame() {
 }
 
 function nextRound() {
-    if(confirm("Starta ny runda? Namnen sparas.")) {
+    if(confirm("Starta nästa runda?")) {
         players.forEach(p => p.scores = {});
         localStorage.removeItem('statzy_scores');
         const list = document.getElementById('player-list');
@@ -212,7 +201,7 @@ function calculateValues(pIdx) {
 
 function renderBoard() {
     const renderTable = (cats, isUpper) => {
-        let h = `<thead><tr><th>${isUpper ? 'Övre' : 'Nedre'}</th>${players.map(p => `<th style="color:${p.color}">${p.name[0]}</th>`).join('')}</tr></thead><tbody>`;
+        let h = `<thead><tr><th></th>${players.map(p => `<th style="color:${p.color}">${p.name[0]}</th>`).join('')}</tr></thead><tbody>`;
         cats.forEach(cat => {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
@@ -246,7 +235,7 @@ function openInput(pIdx, cat) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
         if (upperCats.includes(cat)) { 
-            const v = upperCats.indexOf(cat)+1; for(let j=1;j<=6;j++) opts.push(v*j);
+            const v = upperCats.indexOf(cat)+1; for(let j=1; j<=6; j++) opts.push(v*j);
         } else if (cat === "Ett par") [2,4,6,8,10,12].forEach(v => opts.push(v));
         else if (cat === "Triss") [3,6,9,12,15,18].forEach(v => opts.push(v));
         else if (cat === "Fyrtal") [4,8,12,16,20,24].forEach(v => opts.push(v));
@@ -274,11 +263,7 @@ function pressNum(v) {
 function confirmNumeric() {
     if (currentNumInput === "") return;
     const val = parseInt(currentNumInput);
-    let min = 0, max = 30;
-    if (activeCat === "Två par") { min = 6; max = 22; }
-    if (activeCat === "Kåk") { min = 7; max = 28; }
-    if (val < min || val > max) { alert(`Fel! Min ${min}, Max ${max}`); } 
-    else { setScoreAndClose(val); }
+    setScoreAndClose(val);
 }
 
 function setScoreAndClose(v) {
