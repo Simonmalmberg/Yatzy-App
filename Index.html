@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zatzy Live Prognos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Zatzy <span class="badge">Live</span></h1>
+            <div id="probability-bar"></div>
+        </header>
+
+        <main id="game-board">
+            </main>
+
+        <section id="dice-section">
+            <div id="dice-container">
+                <div class="die">?</div>
+                <div class="die">?</div>
+                <div class="die">?</div>
+                <div class="die">?</div>
+                <div class="die">?</div>
+            </div>
+            <button id="roll-btn" onclick="rollDice()">Slå tärningar</button>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
