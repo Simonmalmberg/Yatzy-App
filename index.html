@@ -3,88 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Statzy - Strategisk Prognos</title>
+    <title>Statzy - Ultra Compact</title>
     <style>
         :root { 
-            --bg: #0f0f0f; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
-            --padd: 12px; --fs-base: 15px; --sb-h: 24px;
+            --bg: #0a0a0a; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
+            --padd: 10px; --fs-base: 15px; --sb-h: 22px; --row-h: 40px;
         }
 
-        /* ZOOM LÄGEN */
-        body.zoom-compact { --padd: 8px; --fs-base: 13px; --sb-h: 20px; }
-        body.zoom-tiny { --padd: 4px; --fs-base: 11px; --sb-h: 18px; }
+        /* ULTRA-KOMPAKTA LÄGEN */
+        body.zoom-compact { --padd: 4px; --fs-base: 12px; --sb-h: 16px; --row-h: 28px; }
+        body.zoom-tiny { --padd: 1px; --fs-base: 10px; --sb-h: 12px; --row-h: 20px; }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 5px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
         /* Setup Screen */
-        #setup { text-align: center; padding-top: 50px; animation: fadeIn 0.4s; }
-        .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
-        .player-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px 0; }
-        input[type="text"] { background: #2c2c2e; border: 2px solid #3a3a3c; color: white; padding: 14px; border-radius: 12px; width: 65%; font-size: 16px; outline: none; }
-        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 12px; border-radius: 12px; font-weight: bold; }
-        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
+        #setup { text-align: center; padding-top: 40px; animation: fadeIn 0.4s; }
+        .version-tag { font-size: 10px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
+        .player-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; }
+        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
+        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 12px; border-radius: 10px; font-weight: bold; }
+        .btn-main { background: var(--accent); border: none; padding: 16px 20px; border-radius: 14px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 300px; font-size: 1.1em; }
 
-        /* Game Screen Layout */
-        header { position: sticky; top: 0; background: var(--bg); padding: 5px 0; z-index: 10; border-bottom: 1px solid #2c2c2e; }
-        .prob-bar { display: flex; height: 34px; background: #1c1c1e; border-radius: 17px; overflow: hidden; margin: 10px 0; border: 1px solid #333; }
-        .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 14px; line-height: 34px; font-weight: 900; }
-        #winner-banner { display: none; background: #ffd700; color: #000; padding: 14px; text-align: center; font-weight: 900; border-radius: 12px; margin-bottom: 10px; }
+        /* Game Header */
+        header { position: sticky; top: 0; background: var(--bg); padding: 4px 0; z-index: 10; border-bottom: 1px solid #222; }
+        .prob-bar { display: flex; height: 24px; background: #111; border-radius: 12px; overflow: hidden; margin: 4px 0; border: 1px solid #333; }
+        .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: 24px; font-weight: 900; }
+        #winner-banner { display: none; background: #ffd700; color: #000; padding: 8px; text-align: center; font-weight: 900; border-radius: 8px; margin-bottom: 5px; font-size: 12px; }
 
-        /* Tables */
+        /* Tables - Thinner Rows */
         #score-container { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: var(--padd) 4px; border-bottom: 1px solid #1c1c1e; text-align: center; }
-        td:first-child { text-align: left; width: 40%; font-weight: bold; color: #8e8e93; padding-left: 10px; }
-        .score-box { background: #1c1c1e; border-radius: 10px; padding: 10px 0; min-height: var(--sb-h); border: 1px solid #3a3a3c; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 3px); }
-        .sum-row { background: #141414; color: #fff; font-size: 0.9em; }
-        .total-row { background: #000; border-top: 3px solid var(--accent); color: var(--accent); font-size: 1.2em; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th { padding: 4px 2px; font-size: 0.9em; color: #555; text-transform: uppercase; }
+        td { padding: var(--padd) 2px; border-bottom: 1px solid #111; text-align: center; height: var(--row-h); }
+        td:first-child { text-align: left; width: 35%; font-weight: 700; color: #777; padding-left: 6px; }
+        
+        .score-box { background: #161618; border-radius: 5px; padding: 4px 0; min-height: var(--sb-h); border: 1px solid #2c2c2e; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 2px); line-height: var(--sb-h); }
+        .sum-row { background: #111; color: #aaa; font-size: 0.85em; }
+        .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
 
         /* TV LÄGE (LANDSCAPE) */
-        body.mode-tv #game { max-width: 1200px; margin: 0 auto; }
-        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        body.mode-tv .game-footer { display: flex; justify-content: center; align-items: center; gap: 30px; }
+        body.mode-tv #game { max-width: 1400px; margin: 0 auto; }
+        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        body.mode-tv .game-footer { display: flex; justify-content: center; align-items: center; gap: 20px; }
 
-        /* Zoom & View Settings at bottom */
-        .settings-footer { margin-top: 50px; padding: 30px 20px 80px 20px; border-top: 1px dashed #333; text-align: center; }
-        .settings-title { font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight: bold; }
-        .zoom-toolbar { display: inline-flex; background: #1c1c1e; padding: 5px; border-radius: 12px; gap: 5px; margin-bottom: 20px; }
-        .zoom-btn { background: none; border: none; color: #666; padding: 10px 15px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+        /* Settings in Footer */
+        .settings-footer { margin-top: 20px; padding: 15px 10px 60px 10px; border-top: 1px solid #1a1a1a; text-align: center; }
+        .settings-title { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .zoom-toolbar { display: inline-flex; background: #111; padding: 4px; border-radius: 10px; gap: 4px; }
+        .zoom-btn { background: none; border: none; color: #555; padding: 8px 12px; border-radius: 7px; font-size: 10px; font-weight: bold; cursor: pointer; }
         .zoom-btn.active { background: var(--accent); color: #000; }
-        .tv-toggle { display: block; margin: 10px auto; color: #888; border: 1px solid #333; background: #1a1a1a; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+        .tv-toggle { display: block; margin: 10px auto; color: #666; border: 1px solid #222; background: #000; padding: 10px; border-radius: 8px; font-size: 11px; }
         .tv-toggle.active { border-color: var(--accent); color: var(--accent); }
 
-        /* Modal */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(10px); }
-        #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 35px 35px 0 0; padding: 30px 20px 40px 20px; box-sizing: border-box; }
-        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .quick-btn { background: #2c2c2e; padding: 22px; border-radius: 18px; text-align: center; font-weight: 800; font-size: 22px; color: white; box-shadow: 0 4px 0 #000; }
-        .clear-link { display: block; text-align: center; margin-top: 30px; color: #666; font-size: 14px; text-decoration: underline; }
-        
-        #num-display { background: #000; color: var(--accent); font-size: 48px; text-align: center; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 2px solid #333; font-family: monospace; }
-        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        /* Custom Keypads */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 90; backdrop-filter: blur(10px); }
+        #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #161618; z-index: 100; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; }
+        .modal-title { margin-bottom: 15px; font-weight: 800; color: var(--accent); text-align: center; font-size: 1.1em; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; }
+        .clear-link { display: block; text-align: center; margin-top: 20px; color: #555; font-size: 13px; text-decoration: underline; }
+        #num-display { background: #000; color: var(--accent); font-size: 40px; text-align: center; padding: 10px; border-radius: 15px; margin-bottom: 15px; border: 2px solid #333; }
+        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .ok-btn { background: var(--win) !important; color: #000 !important; grid-column: span 2; }
-        .error-msg { color: var(--error); font-size: 12px; text-align: center; margin-bottom: 10px; display: none; font-weight: bold; }
 
-        .game-footer { padding: 20px; text-align: center; }
-        .btn-outline { background: none; border: 1.5px solid #333; color: #666; padding: 14px 24px; border-radius: 14px; font-size: 14px; font-weight: 600; }
+        .game-footer { padding: 10px; text-align: center; }
+        .btn-outline { background: none; border: 1px solid #222; color: #444; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 600; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="zoom-normal">
 
 <div id="setup">
-    <h1 style="font-size: 4.5em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 1.9.0 PRO</div>
-    <br><br>
+    <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
+    <div class="version-tag">VERSION 2.0.0 ULTRA-COMPACT</div>
+    <br>
     <div id="player-list"></div>
-    <button class="btn-outline" style="color: var(--accent); border-color: var(--accent); margin-top: 15px;" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
-    <br><br><br>
+    <button class="btn-outline" style="color: var(--accent); border-color: var(--accent); margin-top: 10px;" onclick="addPlayerField('')">+ SPELARE</button>
+    <br><br>
     <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
 </div>
 
 <div id="game" style="display:none;">
     <header>
-        <div id="winner-banner">🏆 <span id="winner-name"></span> ÄR VINNARE! 🏆</div>
+        <div id="winner-banner">🏆 <span id="winner-name"></span> Vinner! 🏆</div>
         <div class="prob-bar" id="probBar"></div>
     </header>
     
@@ -95,19 +96,18 @@
 
     <div class="game-footer">
         <button class="btn-main" onclick="nextRound()">NÄSTA RUNDA</button>
-        <br><br>
-        <button class="btn-outline" onclick="if(confirm('Nollställ allt?')) resetEverything()">Avsluta match</button>
+        <br>
+        <button class="btn-outline" style="margin-top:10px" onclick="if(confirm('Nollställ?')) resetEverything()">Avsluta</button>
     </div>
 
     <div class="settings-footer">
-        <div class="settings-title">Visningsinställningar</div>
+        <div class="settings-title">Zoom & Vy</div>
         <div class="zoom-toolbar">
             <button class="zoom-btn active" onclick="setZoom('normal', this)">Standard</button>
             <button class="zoom-btn" onclick="setZoom('compact', this)">Kompakt</button>
             <button class="zoom-btn" onclick="setZoom('tiny', this)">Minimal</button>
         </div>
-        <button class="tv-toggle" id="tvBtn" onclick="toggleTV()">Spegla till TV / Liggande läge</button>
-        <div style="font-size: 10px; color: #333; margin-top: 20px;">STATZY STRATEGIC ENGINE v1.9</div>
+        <button class="tv-toggle" id="tvBtn" onclick="toggleTV()">TV-Läge / Liggande</button>
     </div>
 </div>
 
@@ -119,13 +119,13 @@
         <div class="clear-link" onclick="setScoreAndClose(null)">Rensa ruta</div>
     </div>
     <div id="numeric-section" style="display:none;">
-        <div id="err" class="error-msg"></div>
+        <div id="err" style="color:red; font-size:11px; text-align:center; display:none; margin-bottom:5px;"></div>
         <div id="num-display">-</div>
         <div class="num-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
             <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
             <div class="quick-btn" onclick="pressNum(7)">7</div><div class="quick-btn" onclick="pressNum(8)">8</div><div class="quick-btn" onclick="pressNum(9)">9</div>
-            <div class="quick-btn" style="background:#3a3a3c" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
+            <div class="quick-btn" style="background:#333" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
             <div class="quick-btn ok-btn" onclick="confirmNumeric()">KLAR</div>
         </div>
         <div class="clear-link" onclick="setScoreAndClose(null)">Rensa ruta</div>
@@ -163,9 +163,9 @@ function setZoom(mode, btn) {
 }
 
 function toggleTV() {
-    const active = document.body.classList.toggle('mode-tv');
+    document.body.classList.toggle('mode-tv');
     document.getElementById('tvBtn').classList.toggle('active');
-    renderBoard(); // Rendera om för att tabellerna ska hamna rätt
+    renderBoard();
 }
 
 function addPlayerField(name) {
@@ -197,7 +197,6 @@ function nextRound() {
         players.forEach(p => addPlayerField(p.name));
         document.getElementById('game').style.display = 'none';
         document.getElementById('setup').style.display = 'block';
-        window.scrollTo(0,0);
     }
 }
 
@@ -228,7 +227,6 @@ function renderBoard() {
         }
         return h + `</tbody>`;
     };
-
     document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
     document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
     updatePrognosis();
@@ -244,7 +242,6 @@ function openInput(pIdx, cat) {
     document.getElementById('modalTitle').innerText = `${players[pIdx].name}: ${cat}`;
     document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
     document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
-    document.getElementById('err').style.display = 'none';
     if (!isNumeric) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
@@ -269,7 +266,6 @@ function openInput(pIdx, cat) {
 }
 
 function pressNum(v) {
-    document.getElementById('err').style.display = 'none';
     if (v === 'C') currentNumInput = "";
     else if (currentNumInput.length < 2) currentNumInput += v;
     document.getElementById('num-display').innerText = currentNumInput || "-";
@@ -281,10 +277,8 @@ function confirmNumeric() {
     let min = 0, max = 30;
     if (activeCat === "Två par") { min = 6; max = 22; }
     if (activeCat === "Kåk") { min = 7; max = 28; }
-    if (val < min || val > max) {
-        document.getElementById('err').innerText = `Ogiltigt! Min ${min}, max ${max}.`;
-        document.getElementById('err').style.display = 'block';
-    } else { setScoreAndClose(val); }
+    if (val < min || val > max) { alert(`Fel! Min ${min}, Max ${max}`); } 
+    else { setScoreAndClose(val); }
 }
 
 function setScoreAndClose(v) {
@@ -296,7 +290,7 @@ function setScoreAndClose(v) {
 function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
 
 function updatePrognosis() {
-    const iter = 4000;
+    const iter = 3000;
     let wins = new Array(players.length).fill(0);
     for (let i = 0; i < iter; i++) {
         let simScores = players.map(p => {
@@ -309,16 +303,13 @@ function updatePrognosis() {
         wins[simScores.indexOf(Math.max(...simScores))]++;
     }
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
-    let winnerFound = false;
     players.forEach((p, i) => {
         const pct = (wins[i] / iter) * 100;
-        if (pct === 100) { winnerFound = true; document.getElementById('winner-name').innerText = p.name; }
         const div = document.createElement('div'); div.className = "prob-seg";
         div.style.width = pct + "%"; div.style.backgroundColor = p.color;
         div.innerText = pct > 12 ? Math.round(pct) + "%" : "";
         bar.appendChild(div);
     });
-    document.getElementById('winner-banner').style.display = winnerFound ? 'block' : 'none';
 }
 
 function simulate(cat) {
