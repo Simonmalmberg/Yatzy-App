@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Statzy - Live Prognos</title>
+    <title>Statzy - Strategisk Prognos</title>
     <style>
         :root { --bg: #0f0f0f; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* Setup Screen */
         #setup { text-align: center; padding-top: 50px; animation: fadeIn 0.4s; }
         .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px 0; }
-        
-        /* Input för namn - använder placeholder för att slippa sudda */
         input[type="text"] { background: #2c2c2e; border: 2px solid #3a3a3c; color: white; padding: 14px; border-radius: 12px; width: 65%; font-size: 16px; outline: none; }
-        input[type="text"]:focus { border-color: var(--accent); }
-        
         .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 12px; }
         .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
 
-        /* Game Screen */
         header { position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 10; border-bottom: 1px solid #2c2c2e; }
         .prob-bar { display: flex; height: 34px; background: #1c1c1e; border-radius: 17px; overflow: hidden; margin: 10px 0; border: 1px solid #333; }
         .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 14px; line-height: 34px; font-weight: 900; }
@@ -34,16 +28,11 @@
         .sum-row { background: #141414; color: #fff; font-size: 0.9em; }
         .total-row { background: #000; border-top: 3px solid var(--accent); color: var(--accent); font-size: 1.3em; }
 
-        /* MODAL & KEYPADS */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(10px); }
         #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 35px 35px 0 0; padding: 30px 20px 40px 20px; box-sizing: border-box; }
-        
         .modal-title { margin-bottom: 25px; font-weight: 800; color: var(--accent); text-align: center; font-size: 1.3em; }
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .quick-btn { background: #2c2c2e; padding: 22px; border-radius: 18px; text-align: center; font-weight: 800; font-size: 22px; color: white; box-shadow: 0 4px 0 #000; }
-        .quick-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
-        
-        /* Rensa-knapp (Diskretare och längst ner) */
         .clear-link { display: block; text-align: center; margin-top: 30px; color: #666; font-size: 14px; font-weight: 600; text-decoration: underline; padding: 10px; }
         
         #num-display { background: #000; color: var(--accent); font-size: 48px; text-align: center; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 2px solid #333; font-family: monospace; }
@@ -53,7 +42,6 @@
 
         .game-footer { padding: 40px 20px; text-align: center; }
         .btn-outline { background: none; border: 1.5px solid #333; color: #666; padding: 14px 24px; border-radius: 14px; font-size: 14px; font-weight: 600; }
-        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -61,7 +49,7 @@
 
 <div id="setup">
     <h1 style="font-size: 4.5em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 1.6.0 PRO</div>
+    <div class="version-tag">VERSION 1.7.0 STRATEGIC</div>
     <br><br>
     <div id="player-list"></div>
     <button class="btn-outline" style="color: var(--accent); border-color: var(--accent); margin-top: 15px;" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
@@ -85,14 +73,12 @@
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
 <div id="modal">
     <div class="modal-title" id="modalTitle">Kategori</div>
-    
     <div id="quick-pick-section">
         <div class="quick-grid" id="quickGrid"></div>
         <div class="clear-link" onclick="setScoreAndClose(null)">Rensa</div>
     </div>
-
     <div id="numeric-section" style="display:none;">
-        <div id="err" class="error-msg">Ogiltigt poängvärde</div>
+        <div id="err" class="error-msg"></div>
         <div id="num-display">-</div>
         <div class="num-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
@@ -132,7 +118,6 @@ window.onload = () => {
 function addPlayerField(name) {
     const div = document.createElement('div');
     div.className = 'player-row';
-    // Använder placeholder istället för value om namnet är standard "Spelare X"
     const isDefault = name.startsWith('Spelare ');
     div.innerHTML = `<input type="text" placeholder="${isDefault ? name : 'Namn'}" value="${isDefault ? '' : name}">
         <button class="remove-btn" onclick="this.parentElement.remove()">TA BORT</button>`;
@@ -239,18 +224,14 @@ function confirmNumeric() {
     if (currentNumInput === "") return;
     const val = parseInt(currentNumInput);
     let min = 0, max = 100;
-    
-    // Gränskontroll för Yatzy-regler
     if (activeCat === "Två par") { min = 6; max = 22; }
     if (activeCat === "Kåk") { min = 7; max = 28; }
     if (activeCat === "Chans") { min = 5; max = 30; }
 
     if (val < min || val > max) {
-        document.getElementById('err').innerText = `Minst ${min}, max ${max} poäng!`;
+        document.getElementById('err').innerText = `Minst ${min}, max ${max}!`;
         document.getElementById('err').style.display = 'block';
-    } else {
-        setScoreAndClose(val);
-    }
+    } else { setScoreAndClose(val); }
 }
 
 function setScoreAndClose(v) {
@@ -261,8 +242,9 @@ function setScoreAndClose(v) {
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
 
+// MARK: - Den Strategiska Motorn
 function updatePrognosis() {
-    const iter = 3000;
+    const iter = 4000;
     let wins = new Array(players.length).fill(0);
     for (let i = 0; i < iter; i++) {
         let simScores = players.map(p => {
@@ -289,13 +271,36 @@ function updatePrognosis() {
 
 function simulate(cat) {
     const r = Math.random();
-    if (upperCats.includes(cat)) return r > 0.4 ? (upperCats.indexOf(cat) + 1) * 3 : 0;
-    if (cat === "Yatzy") return r < 0.04 ? 50 : 0;
-    if (cat === "Liten stege") return r < 0.25 ? 15 : 0;
-    if (cat === "Stor stege") return r < 0.15 ? 20 : 0;
-    return Math.floor(r * 12) + 10;
+    
+    // ÖVRE SEKTIONEN: Strategiskt spel för Bonus
+    if (upperCats.includes(cat)) {
+        const val = upperCats.indexOf(cat) + 1;
+        // Spelare pressar på 5:or och 6:or för att klara bonus
+        if (val >= 5) {
+            if (r < 0.10) return val * 5; // Yatzy i siffran!
+            if (r < 0.35) return val * 4; // Fyrtal (Väldigt vanligt om man sparar)
+            if (r < 0.85) return val * 3; // Tretal (Standard)
+            return 0; // Misslyckande/Strykning
+        }
+        // Lägre siffror stryks ofta om man går hårt för 6:or
+        return r > 0.5 ? val * 3 : 0;
+    }
+
+    // NEDRE SEKTIONEN: Sannolikhet på 3 slag
+    switch(cat) {
+        case "Yatzy": return r < 0.046 ? 50 : 0; 
+        case "Liten stege": return r < 0.60 ? 15 : 0; // Relativt lätt om man går för den
+        case "Stor stege": return r < 0.45 ? 20 : 0;
+        case "Kåk": return r < 0.40 ? 22 : 0; // Medel-kåk
+        case "Två par": return r < 0.80 ? 16 : 0; // Mycket troligt
+        case "Chans": 
+            // Din input: Strategiskt sparande ger högt medelvärde
+            // Vi simulerar en normalfördelning kring 22
+            return Math.floor(22 + (Math.random() * 8 - 4)); 
+        default:
+            return Math.floor(r * 15) + 5;
+    }
 }
 </script>
 </body>
 </html>
-
