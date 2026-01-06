@@ -5,69 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Statzy - Strategisk Prognos</title>
     <style>
-        :root { --bg: #0f0f0f; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        :root { 
+            --bg: #0f0f0f; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
+            --padd: 12px; --fs-base: 15px; --sb-h: 24px;
+        }
+
+        /* ZOOM LÄGEN */
+        body.zoom-compact { --padd: 8px; --fs-base: 13px; --sb-h: 20px; }
+        body.zoom-tiny { --padd: 4px; --fs-base: 11px; --sb-h: 18px; }
         
-        #setup { text-align: center; padding-top: 50px; animation: fadeIn 0.4s; }
-        .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
-        .player-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px 0; }
-        input[type="text"] { background: #2c2c2e; border: 2px solid #3a3a3c; color: white; padding: 14px; border-radius: 12px; width: 65%; font-size: 16px; outline: none; }
-        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 12px; }
-        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
-
-        header { position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 10; border-bottom: 1px solid #2c2c2e; }
-        .prob-bar { display: flex; height: 34px; background: #1c1c1e; border-radius: 17px; overflow: hidden; margin: 10px 0; border: 1px solid #333; }
-        .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 14px; line-height: 34px; font-weight: 900; }
-        #winner-banner { display: none; background: #ffd700; color: #000; padding: 14px; text-align: center; font-weight: 900; border-radius: 12px; margin-bottom: 10px; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 10px; }
-        th, td { padding: 14px 4px; border-bottom: 1px solid #1c1c1e; text-align: center; }
-        td:first-child { text-align: left; width: 40%; font-weight: bold; color: #8e8e93; padding-left: 10px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        .score-box { background: #1c1c1e; border-radius: 10px; padding: 12px 0; min-height: 24px; border: 1px solid #3a3a3c; font-weight: 800; color: var(--accent); font-size: 18px; }
-        .sum-row { background: #141414; color: #fff; font-size: 0.9em; }
-        .total-row { background: #000; border-top: 3px solid var(--accent); color: var(--accent); font-size: 1.3em; }
-
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(10px); }
-        #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 35px 35px 0 0; padding: 30px 20px 40px 20px; box-sizing: border-box; }
-        .modal-title { margin-bottom: 25px; font-weight: 800; color: var(--accent); text-align: center; font-size: 1.3em; }
-        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .quick-btn { background: #2c2c2e; padding: 22px; border-radius: 18px; text-align: center; font-weight: 800; font-size: 22px; color: white; box-shadow: 0 4px 0 #000; }
-        .clear-link { display: block; text-align: center; margin-top: 30px; color: #666; font-size: 14px; font-weight: 600; text-decoration: underline; padding: 10px; }
+        /* Setup */
+        #setup { text-align: center; padding-top: 30px; }
+        .version-tag { font-size: 10px; color: #444; font-weight: bold; letter-spacing: 2px; }
+        .player-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0; }
+        input[type="text"] { background: #2c2c2e; border: 2px solid #3a3a3c; color: white; padding: 10px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
+        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 10px; border-radius: 10px; font-size: 11px; }
         
-        #num-display { background: #000; color: var(--accent); font-size: 48px; text-align: center; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 2px solid #333; font-family: monospace; }
-        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .ok-btn { background: var(--win) !important; color: #000 !important; grid-column: span 2; font-size: 24px; }
-        .error-msg { color: var(--error); font-size: 12px; text-align: center; margin-bottom: 10px; display: none; font-weight: bold; }
+        /* Game Layout */
+        header { position: sticky; top: 0; background: var(--bg); padding: 5px 0; z-index: 10; border-bottom: 1px solid #2c2c2e; }
+        .prob-bar { display: flex; height: 30px; background: #1c1c1e; border-radius: 15px; overflow: hidden; margin: 5px 0; border: 1px solid #333; }
+        .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 12px; line-height: 30px; font-weight: 900; }
+        
+        /* Table Styling */
+        #score-container { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        th, td { padding: var(--padd) 2px; border-bottom: 1px solid #1c1c1e; text-align: center; }
+        td:first-child { text-align: left; width: 35%; font-weight: bold; color: #8e8e93; padding-left: 5px; }
+        .score-box { background: #1c1c1e; border-radius: 6px; padding: 6px 0; min-height: var(--sb-h); border: 1px solid #3a3a3c; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 2px); }
+        .sum-row { background: #141414; color: #fff; }
+        .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); }
 
-        .game-footer { padding: 40px 20px; text-align: center; }
-        .btn-outline { background: none; border: 1.5px solid #333; color: #666; padding: 14px 24px; border-radius: 14px; font-size: 14px; font-weight: 600; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* TV LÄGE (LANDSCAPE) */
+        body.mode-tv #game { max-width: 1000px; margin: 0 auto; }
+        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        body.mode-tv .game-footer { display: flex; justify-content: center; gap: 20px; }
+        body.mode-tv .btn-main { width: 250px; }
+
+        /* Modal */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(8px); }
+        #modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 30px 30px 0 0; padding: 20px 15px; box-sizing: border-box; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .quick-btn { background: #2c2c2e; padding: 18px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 20px; color: white; box-shadow: 0 4px 0 #000; }
+        .clear-link { display: block; text-align: center; margin-top: 20px; color: #666; font-size: 13px; text-decoration: underline; }
+        
+        #num-display { background: #000; color: var(--accent); font-size: 40px; text-align: center; padding: 10px; border-radius: 15px; margin-bottom: 15px; border: 2px solid #333; font-family: monospace; }
+        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .ok-btn { background: var(--win) !important; color: #000 !important; grid-column: span 2; }
+
+        /* Zoom Toolbar */
+        #zoom-toolbar { display: flex; justify-content: center; gap: 5px; padding: 10px; background: #000; position: fixed; bottom: 0; left: 0; width: 100%; border-top: 1px solid #333; z-index: 20; }
+        .zoom-btn { background: #222; border: 1px solid #444; color: #888; padding: 8px 10px; border-radius: 8px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .zoom-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        .btn-main { background: var(--accent); border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; color: #000; width: 90%; }
+        .btn-outline { background: none; border: 1px solid #333; color: #666; padding: 10px 15px; border-radius: 10px; font-size: 12px; }
     </style>
 </head>
-<body>
+<body class="zoom-normal">
 
 <div id="setup">
-    <h1 style="font-size: 4.5em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 1.7.0 STRATEGIC</div>
-    <br><br>
+    <h1 style="font-size: 3em; margin: 0; color: var(--accent); letter-spacing: -2px;">Statzy</h1>
+    <div class="version-tag">V 1.8.0 PRO • MULTI-VIEW</div>
+    <br>
     <div id="player-list"></div>
-    <button class="btn-outline" style="color: var(--accent); border-color: var(--accent); margin-top: 15px;" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
-    <br><br><br>
-    <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
+    <button class="btn-outline" style="color: var(--accent);" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
+    <br><br>
+    <button class="btn-main" style="width: 80%;" onclick="startGame()">STARTA MATCH</button>
 </div>
 
 <div id="game" style="display:none;">
     <header>
-        <div id="winner-banner">🏆 <span id="winner-name"></span> ÄR VINNARE! 🏆</div>
         <div class="prob-bar" id="probBar"></div>
     </header>
-    <table id="scoreTable"></table>
-    <div class="game-footer">
+    
+    <div id="score-container">
+        <table id="tableUpper"></table>
+        <table id="tableLower"></table>
+    </div>
+
+    <div class="game-footer" style="padding-bottom: 80px; margin-top: 20px; text-align: center;">
         <button class="btn-main" onclick="nextRound()">NÄSTA RUNDA</button>
         <br><br>
-        <button class="btn-outline" onclick="if(confirm('Nollställ allt och börja om?')) resetEverything()">Avsluta match</button>
+        <button class="btn-outline" onclick="if(confirm('Nollställ allt?')) resetEverything()">Avsluta match</button>
     </div>
+</div>
+
+<div id="zoom-toolbar">
+    <button class="zoom-btn active" onclick="setZoom('normal', this)">Standard</button>
+    <button class="zoom-btn" onclick="setZoom('compact', this)">Kompakt</button>
+    <button class="zoom-btn" onclick="setZoom('tiny', this)">Minimal</button>
+    <button class="zoom-btn" onclick="toggleTV(this)">TV-Läge</button>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
@@ -78,7 +107,6 @@
         <div class="clear-link" onclick="setScoreAndClose(null)">Rensa</div>
     </div>
     <div id="numeric-section" style="display:none;">
-        <div id="err" class="error-msg"></div>
         <div id="num-display">-</div>
         <div class="num-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
@@ -102,8 +130,7 @@ window.onload = () => {
     const savedNames = localStorage.getItem('statzy_names');
     const savedScores = localStorage.getItem('statzy_scores');
     if (savedNames) {
-        const names = JSON.parse(savedNames);
-        names.forEach(n => addPlayerField(n));
+        JSON.parse(savedNames).forEach(n => addPlayerField(n));
         if (savedScores) {
             players = JSON.parse(savedScores);
             document.getElementById('setup').style.display = 'none';
@@ -115,12 +142,24 @@ window.onload = () => {
     }
 };
 
+function setZoom(mode, btn) {
+    document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
+    document.body.classList.add('zoom-' + mode);
+    document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function toggleTV(btn) {
+    document.body.classList.toggle('mode-tv');
+    btn.classList.toggle('active');
+}
+
 function addPlayerField(name) {
     const div = document.createElement('div');
     div.className = 'player-row';
     const isDefault = name.startsWith('Spelare ');
     div.innerHTML = `<input type="text" placeholder="${isDefault ? name : 'Namn'}" value="${isDefault ? '' : name}">
-        <button class="remove-btn" onclick="this.parentElement.remove()">TA BORT</button>`;
+        <button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
     document.getElementById('player-list').appendChild(div);
 }
 
@@ -152,30 +191,33 @@ function resetEverything() { localStorage.clear(); location.reload(); }
 function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(players)); }
 
 function calculateValues(pIdx) {
-    let sum = 0;
-    upperCats.forEach(cat => sum += (players[pIdx].scores[cat] || 0));
+    let sum = 0; upperCats.forEach(cat => sum += (players[pIdx].scores[cat] || 0));
     const bonus = sum >= 63 ? 50 : 0;
-    let total = sum + bonus;
-    lowerCats.forEach(cat => total += (players[pIdx].scores[cat] || 0));
+    let total = sum + bonus; lowerCats.forEach(cat => total += (players[pIdx].scores[cat] || 0));
     return { sum, bonus, total };
 }
 
 function renderBoard() {
-    let html = `<thead><tr><th>Kategori</th>${players.map(p => `<th style="color:${p.color}">${p.name}</th>`).join('')}</tr></thead><tbody>`;
-    upperCats.forEach(cat => html += renderRow(cat));
-    html += renderStaticRow("Summa", "sum", "sum-row");
-    html += renderStaticRow("Bonus (50p)", "bonus", "sum-row");
-    lowerCats.forEach(cat => html += renderRow(cat));
-    html += renderStaticRow("TOTALT", "total", "total-row");
-    document.getElementById('scoreTable').innerHTML = html;
-    updatePrognosis();
-}
+    const renderTable = (cats, isUpper) => {
+        let h = `<thead><tr><th>${isUpper ? 'Övre' : 'Nedre'}</th>${players.map(p => `<th style="color:${p.color}">${p.name[0]}</th>`).join('')}</tr></thead><tbody>`;
+        cats.forEach(cat => {
+            h += `<tr><td>${cat}</td>${players.map((p, i) => {
+                let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
+                return `<td><div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
+            }).join('')}</tr>`;
+        });
+        if(isUpper) {
+            h += renderStaticRow("Summa", "sum", "sum-row");
+            h += renderStaticRow("Bonus", "bonus", "sum-row");
+        } else {
+            h += renderStaticRow("TOTALT", "total", "total-row");
+        }
+        return h + `</tbody>`;
+    };
 
-function renderRow(cat) {
-    return `<tr><td>${cat}</td>${players.map((p, i) => {
-        let display = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
-        return `<td><div class="score-box" onclick="openInput(${i}, '${cat}')">${display}</div></td>`;
-    }).join('')}</tr>`;
+    document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
+    document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
+    updatePrognosis();
 }
 
 function renderStaticRow(label, type, className) {
@@ -188,8 +230,7 @@ function openInput(pIdx, cat) {
     document.getElementById('modalTitle').innerText = `${players[pIdx].name}: ${cat}`;
     document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
     document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
-    document.getElementById('err').style.display = 'none';
-
+    
     if (!isNumeric) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
@@ -214,7 +255,6 @@ function openInput(pIdx, cat) {
 }
 
 function pressNum(v) {
-    document.getElementById('err').style.display = 'none';
     if (v === 'C') currentNumInput = "";
     else if (currentNumInput.length < 2) currentNumInput += v;
     document.getElementById('num-display').innerText = currentNumInput || "-";
@@ -223,15 +263,7 @@ function pressNum(v) {
 function confirmNumeric() {
     if (currentNumInput === "") return;
     const val = parseInt(currentNumInput);
-    let min = 0, max = 100;
-    if (activeCat === "Två par") { min = 6; max = 22; }
-    if (activeCat === "Kåk") { min = 7; max = 28; }
-    if (activeCat === "Chans") { min = 5; max = 30; }
-
-    if (val < min || val > max) {
-        document.getElementById('err').innerText = `Minst ${min}, max ${max}!`;
-        document.getElementById('err').style.display = 'block';
-    } else { setScoreAndClose(val); }
+    setScoreAndClose(val);
 }
 
 function setScoreAndClose(v) {
@@ -242,9 +274,8 @@ function setScoreAndClose(v) {
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
 
-// MARK: - Den Strategiska Motorn
 function updatePrognosis() {
-    const iter = 4000;
+    const iter = 3000;
     let wins = new Array(players.length).fill(0);
     for (let i = 0; i < iter; i++) {
         let simScores = players.map(p => {
@@ -257,48 +288,33 @@ function updatePrognosis() {
         wins[simScores.indexOf(Math.max(...simScores))]++;
     }
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
-    let winnerFound = false;
     players.forEach((p, i) => {
         const pct = (wins[i] / iter) * 100;
-        if (pct === 100) { winnerFound = true; document.getElementById('winner-name').innerText = p.name; }
         const div = document.createElement('div'); div.className = "prob-seg";
         div.style.width = pct + "%"; div.style.backgroundColor = p.color;
         div.innerText = pct > 12 ? Math.round(pct) + "%" : "";
         bar.appendChild(div);
     });
-    document.getElementById('winner-banner').style.display = winnerFound ? 'block' : 'none';
 }
 
 function simulate(cat) {
     const r = Math.random();
-    
-    // ÖVRE SEKTIONEN: Strategiskt spel för Bonus
     if (upperCats.includes(cat)) {
         const val = upperCats.indexOf(cat) + 1;
-        // Spelare pressar på 5:or och 6:or för att klara bonus
         if (val >= 5) {
-            if (r < 0.10) return val * 5; // Yatzy i siffran!
-            if (r < 0.35) return val * 4; // Fyrtal (Väldigt vanligt om man sparar)
-            if (r < 0.85) return val * 3; // Tretal (Standard)
-            return 0; // Misslyckande/Strykning
+            if (r < 0.10) return val * 5; if (r < 0.35) return val * 4;
+            if (r < 0.85) return val * 3; return 0;
         }
-        // Lägre siffror stryks ofta om man går hårt för 6:or
         return r > 0.5 ? val * 3 : 0;
     }
-
-    // NEDRE SEKTIONEN: Sannolikhet på 3 slag
     switch(cat) {
         case "Yatzy": return r < 0.046 ? 50 : 0; 
-        case "Liten stege": return r < 0.60 ? 15 : 0; // Relativt lätt om man går för den
+        case "Liten stege": return r < 0.60 ? 15 : 0;
         case "Stor stege": return r < 0.45 ? 20 : 0;
-        case "Kåk": return r < 0.40 ? 22 : 0; // Medel-kåk
-        case "Två par": return r < 0.80 ? 16 : 0; // Mycket troligt
-        case "Chans": 
-            // Din input: Strategiskt sparande ger högt medelvärde
-            // Vi simulerar en normalfördelning kring 22
-            return Math.floor(22 + (Math.random() * 8 - 4)); 
-        default:
-            return Math.floor(r * 15) + 5;
+        case "Kåk": return r < 0.40 ? 22 : 0;
+        case "Två par": return r < 0.80 ? 16 : 0;
+        case "Chans": return Math.floor(22 + (Math.random() * 8 - 4)); 
+        default: return Math.floor(r * 12) + 10;
     }
 }
 </script>
