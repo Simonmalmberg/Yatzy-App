@@ -19,9 +19,12 @@
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
         #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
-        .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
         input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
+        
+        /* Röd TA BORT knapp */
+        .remove-btn { background: #451010; color: #ff3b30; border: 1px solid #631414; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 11px; }
+        
         .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
 
         header { position: sticky; top: 0; background: var(--bg); padding: 4px 5px; z-index: 10; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
@@ -42,7 +45,6 @@
         .sum-row { background: #111; color: #fff; font-size: 0.85em; }
         .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
         .critical-cell .score-box { border-color: #ffd700; }
-        .critical-tag { position: absolute; top: -1px; right: 1px; font-size: 7px; color: #ffd700; font-weight: 900; text-transform: uppercase; }
 
         body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -65,8 +67,6 @@
         .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .switch.on::after { left: 22px; }
         
-        .guide-box { background: #111; padding: 12px; border-radius: 10px; font-size: 12px; line-height: 1.4; color: #888; }
-
         .game-footer { padding: 15px 5px 30px 5px; text-align: center; display: none; }
         .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -76,7 +76,7 @@
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 3.1.0 PRO</div>
+    <div class="version-tag">VERSION 3.2.0 ELITE</div>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
     <br><br>
@@ -114,16 +114,8 @@
             <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
         </div>
         <div class="toggle-row">
-            <span>TV-Läge (Landscape)</span>
+            <span>TV-Läge</span>
             <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
-        </div>
-    </div>
-    <div class="settings-section">
-        <span class="settings-label">Pro-tips: Spara som App</span>
-        <div class="guide-box">
-            <b>iPhone:</b> Tryck på Dela-knappen i Safari och välj <b>"Lägg till på hemskärmen"</b>.
-            <br><br>
-            <b>Android:</b> Tryck på prickarna i Chrome och välj <b>"Installera app"</b>.
         </div>
     </div>
     <div class="settings-section" style="border:none">
@@ -209,7 +201,7 @@ function addPlayerField(name) {
     div.className = 'player-row';
     const isDefault = name.startsWith('Spelare ');
     div.innerHTML = `<input type="text" placeholder="${isDefault ? name : 'Namn'}" value="${isDefault ? '' : name}">
-        <button style="border:none; background:none; color:#444; font-size:11px;" onclick="this.parentElement.remove()">X</button>`;
+        <button class="remove-btn" onclick="this.parentElement.remove()">TA BORT</button>`;
     document.getElementById('player-list').appendChild(div);
 }
 
@@ -217,7 +209,6 @@ function startGame() {
     const inputs = document.querySelectorAll('#player-list input');
     let rawNames = Array.from(inputs).map((i, idx) => i.value || i.placeholder || `Spelare ${idx+1}`);
     let nameCounts = {};
-    // Logik för unika namn
     let uniqueNames = rawNames.map(name => {
         nameCounts[name] = (nameCounts[name] || 0) + 1;
         if (rawNames.filter(n => n === name).length > 1) return `${name} ${nameCounts[name]}`;
@@ -250,7 +241,6 @@ function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(pla
 function getTableDisplayName(name) {
     const zoom = document.body.className;
     if (zoom === 'zoom-normal' && players.length <= 3) return name.substring(0, 6);
-    if (name.length <= 3) return name;
     return name.substring(0, 2).toUpperCase();
 }
 
@@ -260,15 +250,15 @@ function renderBoard() {
         cats.forEach(cat => {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
-                const isCrit = options.critical && p.criticalCat === cat;
                 const isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
-                return `<td class="${isCrit ? 'critical-cell' : ''}"><div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
+                return `<td class="${options.critical && p.criticalCat === cat ? 'critical-cell' : ''}"><div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
             }).join('')}</tr>`;
         });
         if(isUpper) {
             h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => {
                 const v = calculateValues(i);
-                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">(${v.needed > 0 ? v.needed : 'OK'})</span></td>`;
+                let diffText = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
+                return `<td style="font-weight:bold">${v.sum} <span style="font-size:9px; opacity:0.8; color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">(${diffText})</span></td>`;
             }).join('')}</tr>`;
             h += renderStaticRow("Bonus", "bonus", "sum-row");
         } else { h += renderStaticRow("TOTALT", "total", "total-row"); }
@@ -280,8 +270,7 @@ function renderBoard() {
 }
 
 function checkGameStatus() {
-    const totalFields = 15;
-    const allFinished = players.every(p => Object.keys(p.scores).length === totalFields);
+    const allFinished = players.every(p => Object.keys(p.scores).length === 15);
     document.getElementById('mainFooter').style.display = allFinished ? 'block' : 'none';
 }
 
@@ -290,10 +279,17 @@ function renderStaticRow(label, type, className) {
 }
 
 function calculateValues(pIdx) {
-    let sum = 0; upperCats.forEach(cat => sum += (players[pIdx].scores[cat] || 0));
+    let sum = 0;
+    let diff = 0;
+    upperCats.forEach((cat, idx) => {
+        if (players[pIdx].scores[cat] !== undefined) {
+            sum += players[pIdx].scores[cat];
+            diff += (players[pIdx].scores[cat] - (idx + 1) * 3);
+        }
+    });
     const bonus = sum >= 63 ? 50 : 0;
     const total = sum + bonus + lowerCats.reduce((a,c) => a + (players[pIdx].scores[c] || 0), 0);
-    return { sum, bonus, total, needed: 63 - sum };
+    return { sum, bonus, total, diff };
 }
 
 function openInput(pIdx, cat) {
@@ -326,12 +322,11 @@ function pressNum(v) {
 }
 
 function confirmNumeric() {
-    if (currentNumInput === "") return;
     const val = parseInt(currentNumInput);
     let min = 0, max = 30;
     if (activeCat === "Två par") { min = 6; max = 22; }
     if (activeCat === "Kåk") { min = 7; max = 28; }
-    if (val < min || val > max) { document.getElementById('err-msg').innerText = `Min ${min}, max ${max}`; } 
+    if (isNaN(val) || val < min || val > max) { document.getElementById('err-msg').innerText = `Min ${min}, max ${max}`; } 
     else { setScoreAndClose(val); }
 }
 
@@ -349,26 +344,17 @@ function updatePrognosis() {
     for (let i = 0; i < iter; i++) {
         let simScores = players.map(p => {
             let s = 0, uSum = 0;
-            upperCats.forEach(c => { let v = p.scores[c] !== undefined ? p.scores[c] : simulate(c); uSum += v; s += v; });
+            upperCats.forEach(c => { 
+                let v = p.scores[c] !== undefined ? p.scores[c] : simulate(c, true); 
+                uSum += v; s += v; 
+            });
+            // Smartare bonus-simulering
             if (uSum >= 63) s += 50;
-            lowerCats.forEach(c => s += (p.scores[c] !== undefined ? p.scores[c] : simulate(c)));
+            lowerCats.forEach(c => s += (p.scores[c] !== undefined ? p.scores[c] : simulate(c, false)));
             return s;
         });
         wins[simScores.indexOf(Math.max(...simScores))]++;
     }
-    players.forEach((p, idx) => {
-        const empty = [...upperCats, ...lowerCats].filter(c => p.scores[c] === undefined);
-        const bonusInfo = calculateValues(idx);
-        if (empty.length > 0) {
-            if (bonusInfo.needed > 0) {
-                if (p.scores["Sexor"] === undefined) { p.criticalCat = "Sexor"; return; }
-                if (p.scores["Femmor"] === undefined) { p.criticalCat = "Femmor"; return; }
-            }
-            if (p.scores["Yatzy"] === undefined) { p.criticalCat = "Yatzy"; return; }
-            const smartEmpty = empty.filter(c => c !== "Ettor" && c !== "Tvåor");
-            p.criticalCat = smartEmpty.length > 0 ? smartEmpty[Math.floor(Math.random() * smartEmpty.length)] : empty[0];
-        }
-    });
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
     players.forEach((p, i) => {
         const pct = (wins[i] / iter) * 100;
@@ -379,12 +365,22 @@ function updatePrognosis() {
     });
 }
 
-function simulate(cat) {
+function simulate(cat, isUpper) {
     const r = Math.random();
-    if (upperCats.includes(cat)) { const val = upperCats.indexOf(cat) + 1; return r > 0.4 ? val * 3 : 0; }
+    if (isUpper) {
+        const val = upperCats.indexOf(cat) + 1;
+        // Simulera strategiskt spel: Chans till 4 stycken på högre nummer
+        if (val >= 4 && r > 0.7) return val * 4;
+        return r > 0.35 ? val * 3 : 0;
+    }
     switch(cat) {
-        case "Yatzy": return r < 0.04 ? 50 : 0; case "Liten stege": return r < 0.5 ? 15 : 0; case "Stor stege": return r < 0.4 ? 20 : 0;
-        case "Kåk": return r < 0.3 ? 22 : 0; case "Två par": return r < 0.7 ? 16 : 0; case "Chans": return 22; default: return 12;
+        case "Yatzy": return r < 0.05 ? 50 : 0; 
+        case "Liten stege": return r < 0.6 ? 15 : 0; 
+        case "Stor stege": return r < 0.5 ? 20 : 0;
+        case "Kåk": return r < 0.4 ? 24 : 0; 
+        case "Två par": return r < 0.8 ? 16 : 0; 
+        case "Chans": return 22; 
+        default: return 12;
     }
 }
 </script>
