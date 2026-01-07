@@ -8,7 +8,7 @@
     <title>Statzy - Strategic AI</title>
     <style>
         :root { 
-            --bg: #0f0f0f; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
+            --bg: #0d0d0d; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
             --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px;
         }
 
@@ -34,19 +34,43 @@
         /* Table UI */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
-        td:first-child { text-align: left; width: 38%; font-weight: 700; color: #888; padding-left: 6px; border-right: 1px solid #222; }
-        .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
+        td:first-child { text-align: left; width: 38%; font-weight: 700; color: #999; padding-left: 6px; border-right: 1px solid #222; }
+        
+        .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        
+        /* Markering för senast ändrade fält */
+        .last-changed-box { border: 2px solid #fff !important; box-shadow: 0 0 10px rgba(255,255,255,0.4); z-index: 2; animation: pulseBorder 2s infinite; }
+        
+        @keyframes pulseBorder { 
+            0% { border-color: rgba(255,255,255,0.4); } 
+            50% { border-color: rgba(255,255,255,1); } 
+            100% { border-color: rgba(255,255,255,0.4); } 
+        }
+
         .sum-row { background: #111; color: #fff; font-size: 0.85em; }
         .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
 
+        /* AI Tips */
+        .critical-cell .score-box { border-color: #ffd700; }
+        .critical-tag { position: absolute; top: -1px; right: 1px; font-size: 7px; color: #ffd700; font-weight: 900; text-transform: uppercase; }
+
+        /* TV MODE */
+        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
         /* Modals */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(5px); }
-        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; max-height: 90vh; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.94); z-index: 90; backdrop-filter: blur(8px); }
+        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; max-height: 90vh; border-top: 1px solid #333; }
+        .modal-title { margin-bottom: 20px; text-align: center; }
+        .modal-cat-name { font-size: 1.5em; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 2px; }
+        .modal-player-name { font-size: 1em; color: #888; font-weight: 500; }
+
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
         .quick-btn.active-zoom { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 209, 255, 0.4); color: var(--accent); }
+        
+        /* Highlight för tidigare valt värde i modalen */
+        .quick-btn.already-selected { background: var(--accent); color: #000; border-color: #fff; }
 
-        /* Settings Guide Styles */
         .settings-section { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; font-weight: bold; }
         .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
@@ -55,9 +79,6 @@
         .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .switch.on::after { left: 22px; }
         
-        .guide-box { background: #111; padding: 12px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #aaa; }
-        .guide-box b { color: var(--accent); }
-
         .game-footer { padding: 15px 5px 30px 5px; text-align: center; display: none; }
         .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
         
@@ -68,7 +89,7 @@
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 2.9.0 PRO</div>
+    <div class="version-tag">VERSION 3.0.0 PRO</div>
     <br><br>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
@@ -102,15 +123,14 @@
             <button class="quick-btn zoom-opt" id="opt-zoom-tiny" style="font-size:10px" onclick="setZoom('zoom-tiny')">Minimal</button>
         </div>
     </div>
-    
     <div class="settings-section">
         <span class="settings-label">AI & Vy</span>
         <div class="toggle-row">
-            <span>Strategiska AI-Tips</span>
+            <span>Strategiska Tips</span>
             <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
         </div>
         <div class="toggle-row">
-            <span>TV-Läge (Landscape)</span>
+            <span>TV-Läge</span>
             <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
         </div>
         <div class="toggle-row">
@@ -118,18 +138,6 @@
             <div class="switch" id="toggleFull" onclick="toggleFullscreen()"></div>
         </div>
     </div>
-
-    <div class="settings-section">
-        <span class="settings-label">Pro-tips: Helskärm utan adressfält</span>
-        <div class="guide-box">
-            <b>iPhone:</b> Tryck på Dela-knappen (fyrkanten med pil) i Safari och välj <b>"Lägg till på hemskärmen"</b>.
-            <br><br>
-            <b>Android:</b> Tryck på de tre prickarna i Chrome och välj <b>"Installera app"</b> eller "Lägg till på startskärmen".
-            <br><br>
-            <i>Statzy körs nu som en riktig app för maximal spelyta!</i>
-        </div>
-    </div>
-
     <div class="settings-section" style="border:none">
         <button class="quick-btn" style="width:100%; background:#222; color:#888; border:none; font-size:14px" onclick="nextRound()">Tvinga: Nästa runda</button>
     </div>
@@ -138,13 +146,14 @@
 
 <div class="overlay" id="overlayInput" onclick="closeModal()"></div>
 <div class="modal" id="modalInput">
+    <div class="modal-title" id="modalInputTitle"></div>
     <div id="quick-pick-section">
         <div class="quick-grid" id="quickGrid"></div>
         <button style="background:none; color:#666; border:none; margin-top:25px; width:100%; text-decoration:underline; font-weight:bold" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
     <div id="numeric-section" style="display:none;">
         <div id="err-msg" style="color:red; text-align:center; font-size:12px; min-height:15px"></div>
-        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid #333">-</div>
+        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:10px; margin-bottom:10px; border:2px solid #333">-</div>
         <div class="num-grid quick-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
             <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
@@ -160,6 +169,8 @@
 let players = [];
 let options = { critical: false, tv: false };
 let activePIdx = null, activeCat = null, currentNumInput = "";
+let lastChangedCell = { pIdx: null, cat: null };
+
 const upperCats = ["Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor"];
 const lowerCats = ["Ett par", "Två par", "Triss", "Fyrtal", "Liten stege", "Stor stege", "Kåk", "Chans", "Yatzy"];
 const colors = ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"];
@@ -240,6 +251,7 @@ function startGame() {
 function nextRound() {
     if(confirm("Starta nästa runda?")) {
         players.forEach(p => p.scores = {});
+        lastChangedCell = { pIdx: null, cat: null };
         localStorage.removeItem('statzy_scores');
         closeSettings();
         document.getElementById('game').style.display = 'none';
@@ -267,7 +279,10 @@ function renderBoard() {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
                 const isCrit = options.critical && p.criticalCat === cat;
-                return `<td class="${isCrit ? 'critical-cell' : ''}"><div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
+                const isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
+                return `<td class="${isCrit ? 'critical-cell' : ''}">
+                    <div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${d}</div>
+                </td>`;
             }).join('')}</tr>`;
         });
         if(isUpper) {
@@ -299,11 +314,20 @@ function renderStaticRow(label, type, className) {
 
 function openInput(pIdx, cat) {
     activePIdx = pIdx; activeCat = cat;
+    const currentScore = players[pIdx].scores[cat];
     const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
+    
+    // Uppdatera Header i Modalen
+    document.getElementById('modalInputTitle').innerHTML = `
+        <div class="modal-cat-name">${cat}</div>
+        <div class="modal-player-name">${players[pIdx].name}</div>
+    `;
+
     document.getElementById('modalInput').style.display = 'block';
     document.getElementById('overlayInput').style.display = 'block';
     document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
     document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
+    
     if (!isNumeric) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
@@ -315,12 +339,18 @@ function openInput(pIdx, cat) {
         else if (cat === "Liten stege") opts.push(15);
         else if (cat === "Stor stege") opts.push(20);
         else if (cat === "Yatzy") opts.push(50);
+        
         opts.sort((a,b)=>a-b).forEach(o => {
-            const b = document.createElement('div'); b.className = 'quick-btn';
-            b.innerText = o === 0 ? "/" : o; b.onclick = () => setScoreAndClose(o);
+            const b = document.createElement('div'); 
+            b.className = 'quick-btn' + (currentScore === o ? ' already-selected' : '');
+            b.innerText = o === 0 ? "/" : o; 
+            b.onclick = () => setScoreAndClose(o);
             grid.appendChild(b);
         });
-    } else { currentNumInput = ""; document.getElementById('num-display').innerText = "-"; }
+    } else { 
+        currentNumInput = currentScore !== undefined ? currentScore.toString() : ""; 
+        document.getElementById('num-display').innerText = currentNumInput || "-"; 
+    }
 }
 
 function pressNum(v) {
@@ -340,8 +370,13 @@ function confirmNumeric() {
 }
 
 function setScoreAndClose(v) {
-    if (v === null) delete players[activePIdx].scores[activeCat];
-    else players[activePIdx].scores[activeCat] = v;
+    if (v === null) {
+        delete players[activePIdx].scores[activeCat];
+        lastChangedCell = { pIdx: null, cat: null };
+    } else {
+        players[activePIdx].scores[activeCat] = v;
+        lastChangedCell = { pIdx: activePIdx, cat: activeCat };
+    }
     saveScores(); closeModal(); renderBoard();
 }
 
