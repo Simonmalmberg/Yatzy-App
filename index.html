@@ -2,13 +2,11 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Statzy - Strategic AI</title>
     <style>
         :root { 
-            --bg: #0d0d0d; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
+            --bg: #0f0f0f; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
             --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px;
         }
 
@@ -16,14 +14,14 @@
         body.zoom-compact { --padd: 2px; --fs-base: 12px; --sb-h: 18px; --row-h: 24px; --prob-h: 18px; }
         body.zoom-tiny { --padd: 0px; --fs-base: 10px; --sb-h: 14px; --row-h: 18px; --prob-h: 14px; }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        /* Setup Screen */
-        #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
-        .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
-        .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
-        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
-        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
+        /* Setup */
+        #setup { text-align: center; padding-top: 30px; }
+        .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 8px 0; }
+        input[type="text"] { background: #1c1c1e; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 60%; font-size: 14px; }
+        .btn-main { background: var(--accent); border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; color: #000; width: 80%; font-size: 1.1em; }
+        .btn-round { background: var(--accent); border: none; padding: 8px 20px; border-radius: 8px; font-weight: 800; color: #000; font-size: 0.9em; }
 
         /* Game Header */
         header { position: sticky; top: 0; background: var(--bg); padding: 4px 5px; z-index: 10; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
@@ -31,69 +29,50 @@
         .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
         .settings-trigger { background: #222; border: none; color: #aaa; padding: 5px 8px; border-radius: 6px; font-size: 16px; }
 
-        /* Table UI */
+        /* Table UI - Mer kontrast */
+        #score-container { display: block; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
-        td:first-child { text-align: left; width: 38%; font-weight: 700; color: #999; padding-left: 6px; border-right: 1px solid #222; }
+        td:first-child { text-align: left; width: 38%; font-weight: 700; color: #888; padding-left: 6px; border-right: 1px solid #222; }
         
-        .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        
-        /* Markering för senast ändrade fält */
-        .last-changed-box { border: 2px solid #fff !important; box-shadow: 0 0 10px rgba(255,255,255,0.4); z-index: 2; animation: pulseBorder 2s infinite; }
-        
-        @keyframes pulseBorder { 
-            0% { border-color: rgba(255,255,255,0.4); } 
-            50% { border-color: rgba(255,255,255,1); } 
-            100% { border-color: rgba(255,255,255,0.4); } 
-        }
-
+        .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
         .sum-row { background: #111; color: #fff; font-size: 0.85em; }
         .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
 
-        /* AI Tips */
-        .critical-cell .score-box { border-color: #ffd700; }
+        /* Kritisk Ruta Highlight */
+        .critical-cell .score-box { border-color: #ffd700; box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
         .critical-tag { position: absolute; top: -1px; right: 1px; font-size: 7px; color: #ffd700; font-weight: 900; text-transform: uppercase; }
 
         /* TV MODE */
         body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         /* Modals */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.94); z-index: 90; backdrop-filter: blur(8px); }
-        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; max-height: 90vh; border-top: 1px solid #333; }
-        .modal-title { margin-bottom: 20px; text-align: center; }
-        .modal-cat-name { font-size: 1.5em; font-weight: 900; color: var(--accent); text-transform: uppercase; margin-bottom: 2px; }
-        .modal-player-name { font-size: 1em; color: #888; font-weight: 500; }
-
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(5px); }
+        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; }
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
-        .quick-btn.active-zoom { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 209, 255, 0.4); color: var(--accent); }
+        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; border: 1px solid #3a3a3c; }
         
-        /* Highlight för tidigare valt värde i modalen */
-        .quick-btn.already-selected { background: var(--accent); color: #000; border-color: #fff; }
+        /* Polisen: Felmeddelande */
+        #err-msg { color: var(--error); font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 16px; }
 
         .settings-section { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; font-weight: bold; }
+        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; }
         .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
         .switch { width: 44px; height: 24px; background: #333; border-radius: 12px; position: relative; cursor: pointer; }
         .switch.on { background: var(--win); }
         .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .switch.on::after { left: 22px; }
-        
-        .game-footer { padding: 15px 5px 30px 5px; text-align: center; display: none; }
-        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .game-footer { padding: 15px 5px 30px 5px; text-align: center; }
     </style>
 </head>
 <body class="zoom-compact">
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 3.0.0 PRO</div>
-    <br><br>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
-    <br><br><br>
+    <br><br>
     <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
 </div>
 
@@ -108,7 +87,7 @@
         <table id="tableLower"></table>
     </div>
 
-    <div class="game-footer" id="mainFooter">
+    <div class="game-footer">
         <button class="btn-round" onclick="nextRound()">NÄSTA RUNDA</button>
     </div>
 </div>
@@ -116,44 +95,36 @@
 <div class="overlay" id="overlaySettings" onclick="closeSettings()"></div>
 <div class="modal" id="modalSettings">
     <div class="settings-section">
-        <span class="settings-label">Zoom & Vy</span>
+        <span class="settings-label">Zoom & Översikt</span>
         <div class="quick-grid">
-            <button class="quick-btn zoom-opt" id="opt-zoom-normal" style="font-size:10px" onclick="setZoom('zoom-normal')">Standard</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-compact" style="font-size:10px" onclick="setZoom('zoom-compact')">Kompakt</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" style="font-size:10px" onclick="setZoom('zoom-tiny')">Minimal</button>
+            <button class="quick-btn" style="font-size:12px" onclick="setZoom('zoom-normal')">Standard</button>
+            <button class="quick-btn" style="font-size:12px" onclick="setZoom('zoom-compact')">Kompakt</button>
+            <button class="quick-btn" style="font-size:12px" onclick="setZoom('zoom-tiny')">Minimal</button>
         </div>
     </div>
     <div class="settings-section">
         <span class="settings-label">AI & Vy</span>
         <div class="toggle-row">
-            <span>Strategiska Tips</span>
+            <span>Visa Strategiska AI-Tips</span>
             <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
         </div>
         <div class="toggle-row">
-            <span>TV-Läge</span>
+            <span>TV-Läge (Landscape)</span>
             <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
         </div>
-        <div class="toggle-row">
-            <span>Helskärm (Dölj webbläsare)</span>
-            <div class="switch" id="toggleFull" onclick="toggleFullscreen()"></div>
-        </div>
-    </div>
-    <div class="settings-section" style="border:none">
-        <button class="quick-btn" style="width:100%; background:#222; color:#888; border:none; font-size:14px" onclick="nextRound()">Tvinga: Nästa runda</button>
     </div>
     <button class="btn-main" onclick="closeSettings()">KLAR</button>
 </div>
 
 <div class="overlay" id="overlayInput" onclick="closeModal()"></div>
 <div class="modal" id="modalInput">
-    <div class="modal-title" id="modalInputTitle"></div>
     <div id="quick-pick-section">
         <div class="quick-grid" id="quickGrid"></div>
         <button style="background:none; color:#666; border:none; margin-top:25px; width:100%; text-decoration:underline; font-weight:bold" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
     <div id="numeric-section" style="display:none;">
-        <div id="err-msg" style="color:red; text-align:center; font-size:12px; min-height:15px"></div>
-        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:10px; margin-bottom:10px; border:2px solid #333">-</div>
+        <div id="err-msg"></div>
+        <div id="num-display">-</div>
         <div class="num-grid quick-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
             <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
@@ -169,8 +140,6 @@
 let players = [];
 let options = { critical: false, tv: false };
 let activePIdx = null, activeCat = null, currentNumInput = "";
-let lastChangedCell = { pIdx: null, cat: null };
-
 const upperCats = ["Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor"];
 const lowerCats = ["Ett par", "Två par", "Triss", "Fyrtal", "Liten stege", "Stor stege", "Kåk", "Chans", "Yatzy"];
 const colors = ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"];
@@ -179,7 +148,9 @@ window.onload = () => {
     const savedNames = localStorage.getItem('statzy_names');
     const savedScores = localStorage.getItem('statzy_scores');
     const savedZoom = localStorage.getItem('statzy_zoom') || 'zoom-compact';
-    setZoom(savedZoom);
+    
+    document.body.className = savedZoom;
+    
     if (savedNames) {
         JSON.parse(savedNames).forEach(n => addPlayerField(n));
         if (savedScores) {
@@ -195,16 +166,20 @@ window.onload = () => {
 };
 
 function setZoom(mode) {
-    document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
-    document.body.classList.add(mode);
+    document.body.className = mode;
+    if(options.tv) document.body.classList.add('mode-tv');
     localStorage.setItem('statzy_zoom', mode);
-    document.querySelectorAll('.zoom-opt').forEach(btn => btn.classList.remove('active-zoom'));
-    const activeBtn = document.getElementById('opt-' + mode);
-    if(activeBtn) activeBtn.classList.add('active-zoom');
 }
 
-function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
-function closeSettings() { document.getElementById('modalSettings').style.display = 'none'; document.getElementById('overlaySettings').style.display = 'none'; }
+function openSettings() { 
+    document.getElementById('modalSettings').style.display = 'block'; 
+    document.getElementById('overlaySettings').style.display = 'block'; 
+}
+
+function closeSettings() { 
+    document.getElementById('modalSettings').style.display = 'none'; 
+    document.getElementById('overlaySettings').style.display = 'none'; 
+}
 
 function toggleOption(opt) {
     options[opt] = !options[opt];
@@ -213,19 +188,9 @@ function toggleOption(opt) {
     renderBoard();
 }
 
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => { console.log("Helskärm stöds ej"); });
-    } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-    }
-    setTimeout(updateToggles, 100);
-}
-
 function updateToggles() {
     document.getElementById('toggleCritical').className = 'switch ' + (options.critical ? 'on' : '');
     document.getElementById('toggleTV').className = 'switch ' + (options.tv ? 'on' : '');
-    document.getElementById('toggleFull').className = 'switch ' + (document.fullscreenElement ? 'on' : '');
 }
 
 function addPlayerField(name) {
@@ -251,14 +216,8 @@ function startGame() {
 function nextRound() {
     if(confirm("Starta nästa runda?")) {
         players.forEach(p => p.scores = {});
-        lastChangedCell = { pIdx: null, cat: null };
         localStorage.removeItem('statzy_scores');
-        closeSettings();
-        document.getElementById('game').style.display = 'none';
-        document.getElementById('setup').style.display = 'block';
-        const list = document.getElementById('player-list');
-        list.innerHTML = "";
-        players.forEach(p => addPlayerField(p.name));
+        renderBoard();
     }
 }
 
@@ -279,16 +238,16 @@ function renderBoard() {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
                 const isCrit = options.critical && p.criticalCat === cat;
-                const isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
                 return `<td class="${isCrit ? 'critical-cell' : ''}">
-                    <div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${d}</div>
+                    <div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div>
+                    ${isCrit ? '<span class="critical-tag">TIPS</span>' : ''}
                 </td>`;
             }).join('')}</tr>`;
         });
         if(isUpper) {
             h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => {
                 const v = calculateValues(i);
-                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">(${v.needed > 0 ? v.needed : 'OK'})</span></td>`;
+                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">${v.needed > 0 ? '(' + v.needed + ' kvar)' : 'OK!'}</span></td>`;
             }).join('')}</tr>`;
             h += renderStaticRow("Bonus", "bonus", "sum-row");
         } else {
@@ -298,14 +257,7 @@ function renderBoard() {
     };
     document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
     document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
-    checkGameStatus();
     updatePrognosis();
-}
-
-function checkGameStatus() {
-    const totalPossibleFields = upperCats.length + lowerCats.length;
-    const allFinished = players.every(p => Object.keys(p.scores).length === totalPossibleFields);
-    document.getElementById('mainFooter').style.display = allFinished ? 'block' : 'none';
 }
 
 function renderStaticRow(label, type, className) {
@@ -314,20 +266,10 @@ function renderStaticRow(label, type, className) {
 
 function openInput(pIdx, cat) {
     activePIdx = pIdx; activeCat = cat;
-    const currentScore = players[pIdx].scores[cat];
     const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
-    
-    // Uppdatera Header i Modalen
-    document.getElementById('modalInputTitle').innerHTML = `
-        <div class="modal-cat-name">${cat}</div>
-        <div class="modal-player-name">${players[pIdx].name}</div>
-    `;
-
-    document.getElementById('modalInput').style.display = 'block';
-    document.getElementById('overlayInput').style.display = 'block';
     document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
     document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
-    
+    document.getElementById('err-msg').innerText = "";
     if (!isNumeric) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
@@ -339,22 +281,20 @@ function openInput(pIdx, cat) {
         else if (cat === "Liten stege") opts.push(15);
         else if (cat === "Stor stege") opts.push(20);
         else if (cat === "Yatzy") opts.push(50);
-        
         opts.sort((a,b)=>a-b).forEach(o => {
-            const b = document.createElement('div'); 
-            b.className = 'quick-btn' + (currentScore === o ? ' already-selected' : '');
-            b.innerText = o === 0 ? "/" : o; 
-            b.onclick = () => setScoreAndClose(o);
+            const b = document.createElement('div'); b.className = 'quick-btn';
+            b.innerText = o === 0 ? "/" : o; b.onclick = () => setScoreAndClose(o);
             grid.appendChild(b);
         });
-    } else { 
-        currentNumInput = currentScore !== undefined ? currentScore.toString() : ""; 
-        document.getElementById('num-display').innerText = currentNumInput || "-"; 
-    }
+    } else { currentNumInput = ""; document.getElementById('num-display').innerText = "-"; }
+    document.getElementById('modalInput').style.display = 'block';
+    document.getElementById('overlayInput').style.display = 'block';
 }
 
 function pressNum(v) {
-    if (v === 'C') currentNumInput = ""; else if (currentNumInput.length < 2) currentNumInput += v;
+    document.getElementById('err-msg').innerText = "";
+    if (v === 'C') currentNumInput = "";
+    else if (currentNumInput.length < 2) currentNumInput += v;
     document.getElementById('num-display').innerText = currentNumInput || "-";
 }
 
@@ -362,21 +302,21 @@ function confirmNumeric() {
     if (currentNumInput === "") return;
     const val = parseInt(currentNumInput);
     let min = 0, max = 30;
+    // YATZY-POLISEN ÅTERVÄNDER
     if (activeCat === "Två par") { min = 6; max = 22; }
     if (activeCat === "Kåk") { min = 7; max = 28; }
     if (activeCat === "Chans") { min = 5; max = 30; }
-    if (val < min || val > max) { document.getElementById('err-msg').innerText = `Min ${min}, max ${max}`; } 
-    else { setScoreAndClose(val); }
+
+    if (val < min || val > max) {
+        document.getElementById('err-msg').innerText = `FEL! Min ${min}, max ${max}.`;
+    } else {
+        setScoreAndClose(val);
+    }
 }
 
 function setScoreAndClose(v) {
-    if (v === null) {
-        delete players[activePIdx].scores[activeCat];
-        lastChangedCell = { pIdx: null, cat: null };
-    } else {
-        players[activePIdx].scores[activeCat] = v;
-        lastChangedCell = { pIdx: activePIdx, cat: activeCat };
-    }
+    if (v === null) delete players[activePIdx].scores[activeCat];
+    else players[activePIdx].scores[activeCat] = v;
     saveScores(); closeModal(); renderBoard();
 }
 
@@ -395,19 +335,29 @@ function updatePrognosis() {
         });
         wins[simScores.indexOf(Math.max(...simScores))]++;
     }
+
+    // SMARTARE TIPS-LOGIK
     players.forEach((p, idx) => {
         const empty = [...upperCats, ...lowerCats].filter(c => p.scores[c] === undefined);
         const bonusInfo = calculateValues(idx);
+        
         if (empty.length > 0) {
+            // Prioritering 1: Bonus-säkring (6:or, 5:or, 4:or)
             if (bonusInfo.needed > 0) {
                 if (p.scores["Sexor"] === undefined) { p.criticalCat = "Sexor"; return; }
                 if (p.scores["Femmor"] === undefined) { p.criticalCat = "Femmor"; return; }
+                if (p.scores["Fyror"] === undefined) { p.criticalCat = "Fyror"; return; }
             }
+            // Prioritering 2: Stora poäng
             if (p.scores["Yatzy"] === undefined) { p.criticalCat = "Yatzy"; return; }
+            if (p.scores["Stor stege"] === undefined) { p.criticalCat = "Stor stege"; return; }
+            
+            // Slumpa bland resten men undvik 1:or och 2:or om möjligt
             const smartEmpty = empty.filter(c => c !== "Ettor" && c !== "Tvåor");
             p.criticalCat = smartEmpty.length > 0 ? smartEmpty[Math.floor(Math.random() * smartEmpty.length)] : empty[0];
         }
     });
+
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
     players.forEach((p, i) => {
         const pct = (wins[i] / iter) * 100;
@@ -425,8 +375,13 @@ function simulate(cat) {
         return r > 0.4 ? val * 3 : 0;
     }
     switch(cat) {
-        case "Yatzy": return r < 0.04 ? 50 : 0; case "Liten stege": return r < 0.5 ? 15 : 0; case "Stor stege": return r < 0.4 ? 20 : 0;
-        case "Kåk": return r < 0.3 ? 22 : 0; case "Två par": return r < 0.7 ? 16 : 0; case "Chans": return 22; default: return 12;
+        case "Yatzy": return r < 0.04 ? 50 : 0; 
+        case "Liten stege": return r < 0.5 ? 15 : 0;
+        case "Stor stege": return r < 0.4 ? 20 : 0;
+        case "Kåk": return r < 0.3 ? 22 : 0;
+        case "Två par": return r < 0.7 ? 16 : 0;
+        case "Chans": return 22; 
+        default: return 12;
     }
 }
 </script>
