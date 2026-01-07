@@ -18,13 +18,10 @@
         
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
+        #setup { text-align: center; padding-top: 30px; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
         input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
-        
-        /* Röd TA BORT knapp */
         .remove-btn { background: #451010; color: #ff3b30; border: 1px solid #631414; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 11px; }
-        
         .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
 
         header { position: sticky; top: 0; background: var(--bg); padding: 4px 5px; z-index: 10; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
@@ -34,49 +31,57 @@
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
-        td:first-child { text-align: left; width: 35%; font-weight: 700; color: #999; padding-left: 6px; border-right: 1px solid #222; }
-        th { font-size: 0.85em; padding-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
+        /* Notch-fix i liggande läge */
+        td:first-child { text-align: left; width: 35%; font-weight: 700; color: #999; padding-left: 10px; border-right: 1px solid #222; }
+        body.mode-tv td:first-child { padding-left: calc(env(safe-area-inset-left) + 20px); }
+
         .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
         .last-changed-box { border: 2px solid #fff !important; box-shadow: 0 0 10px rgba(255,255,255,0.4); z-index: 2; animation: pulseBorder 2s infinite; }
-        
         @keyframes pulseBorder { 50% { border-color: rgba(255,255,255,1); box-shadow: 0 0 15px rgba(255,255,255,0.6); } }
 
         .sum-row { background: #111; color: #fff; font-size: 0.85em; }
         .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
-        .critical-cell .score-box { border-color: #ffd700; }
 
         body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+        /* Modals */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.94); z-index: 90; backdrop-filter: blur(8px); }
-        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; max-height: 90vh; border-top: 1px solid #333; }
-        .modal-title { margin-bottom: 20px; text-align: center; }
-        .modal-cat-name { font-size: 1.5em; font-weight: 900; color: var(--accent); text-transform: uppercase; }
-        .modal-player-name { font-size: 1em; color: #888; font-weight: 500; }
+        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 15px; box-sizing: border-box; border-top: 1px solid #333; }
+        
+        .modal-cat-name { font-size: 1.2em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; }
+        .modal-player-name { font-size: 0.9em; color: #888; text-align: center; margin-bottom: 10px; }
 
-        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
-        .quick-btn.active-zoom { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 209, 255, 0.4); }
-        .quick-btn.already-selected { background: var(--accent); color: #000; border-color: #fff; }
+        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .quick-btn { background: #2c2c2e; padding: 12px; border-radius: 10px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
+        .quick-btn.active-zoom { border-color: var(--accent); }
+        .quick-btn.already-selected { background: var(--accent); color: #000; }
+        
+        /* Död knapp för siffra 4 */
+        .btn-dead { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
 
-        .settings-section { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; font-weight: bold; }
-        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
+        #num-display { background: #000; color: var(--accent); font-size: 32px; text-align: center; padding: 5px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; min-height: 40px; }
+        
+        /* Anpassning för liggande tangentbord */
+        @media (orientation: landscape) {
+            .num-grid { grid-template-columns: repeat(6, 1fr); }
+            .modal { padding: 10px; }
+        }
+
+        .settings-section { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .switch { width: 44px; height: 24px; background: #333; border-radius: 12px; position: relative; cursor: pointer; }
         .switch.on { background: var(--win); }
         .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .switch.on::after { left: 22px; }
         
-        .game-footer { padding: 15px 5px 30px 5px; text-align: center; display: none; }
-        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .game-footer { padding: 10px; text-align: center; display: none; }
+        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; }
     </style>
 </head>
 <body class="zoom-compact">
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 3.2.0 ELITE</div>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
     <br><br>
@@ -100,48 +105,43 @@
 <div class="overlay" id="overlaySettings" onclick="closeSettings()"></div>
 <div class="modal" id="modalSettings">
     <div class="settings-section">
-        <span class="settings-label">Zoom & Vy</span>
         <div class="quick-grid">
-            <button class="quick-btn zoom-opt" id="opt-zoom-normal" style="font-size:10px" onclick="setZoom('zoom-normal')">Standard</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-compact" style="font-size:10px" onclick="setZoom('zoom-compact')">Kompakt</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" style="font-size:10px" onclick="setZoom('zoom-tiny')">Minimal</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-normal" onclick="setZoom('zoom-normal')">STD</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-compact" onclick="setZoom('zoom-compact')">KOMP</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" onclick="setZoom('zoom-tiny')">MINI</button>
         </div>
     </div>
     <div class="settings-section">
-        <span class="settings-label">AI & Vy</span>
-        <div class="toggle-row">
+        <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
             <span>Strategiska Tips</span>
             <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
         </div>
-        <div class="toggle-row">
+        <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
             <span>TV-Läge</span>
             <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
         </div>
-    </div>
-    <div class="settings-section" style="border:none">
-        <button class="quick-btn" style="width:100%; background:#222; color:#888; border:none; font-size:14px" onclick="nextRound()">Tvinga: Nästa runda</button>
+        <div id="wakeIndicator" style="font-size:10px; color:var(--win);">Skärmlås: AKTIVT 🟢</div>
     </div>
     <button class="btn-main" onclick="closeSettings()">KLAR</button>
 </div>
 
 <div class="overlay" id="overlayInput" onclick="closeModal()"></div>
 <div class="modal" id="modalInput">
-    <div class="modal-title" id="modalInputTitle"></div>
+    <div id="modalInputTitle"></div>
     <div id="quick-pick-section">
         <div class="quick-grid" id="quickGrid"></div>
-        <button style="background:none; color:#666; border:none; margin-top:25px; width:100%; text-decoration:underline; font-weight:bold" onclick="setScoreAndClose(null)">Rensa ruta</button>
+        <button style="background:none; color:#666; border:none; margin-top:20px; width:100%; text-decoration:underline;" onclick="setScoreAndClose(null)">Rensa</button>
     </div>
     <div id="numeric-section" style="display:none;">
         <div id="err-msg" style="color:red; text-align:center; font-size:12px; min-height:15px"></div>
-        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:10px; margin-bottom:10px; border:2px solid #333">-</div>
+        <div id="num-display">-</div>
         <div class="num-grid quick-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
-            <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
+            <div class="quick-btn btn-dead">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
             <div class="quick-btn" onclick="pressNum(7)">7</div><div class="quick-btn" onclick="pressNum(8)">8</div><div class="quick-btn" onclick="pressNum(9)">9</div>
             <div class="quick-btn" style="background:#444" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
-            <div class="quick-btn" style="background:var(--win); color:black" onclick="confirmNumeric()">KLAR</div>
+            <div class="quick-btn" style="background:var(--win); color:black" onclick="confirmNumeric()">OK</div>
         </div>
-        <button style="background:none; color:#666; border:none; margin-top:20px; width:100%; text-decoration:underline" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
 </div>
 
@@ -150,6 +150,8 @@ let players = [];
 let options = { critical: false, tv: false };
 let activePIdx = null, activeCat = null, currentNumInput = "";
 let lastChangedCell = { pIdx: null, cat: null };
+let wakeLock = null;
+
 const upperCats = ["Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor"];
 const lowerCats = ["Ett par", "Två par", "Triss", "Fyrtal", "Liten stege", "Stor stege", "Kåk", "Chans", "Yatzy"];
 const colors = ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"];
@@ -170,6 +172,14 @@ window.onload = () => {
     } else { addPlayerField('Spelare 1'); addPlayerField('Spelare 2'); }
     updateToggles();
 };
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+        }
+    } catch (err) {}
+}
 
 function setZoom(mode) {
     document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
@@ -219,11 +229,12 @@ function startGame() {
     saveScores();
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
+    requestWakeLock();
     renderBoard();
 }
 
 function nextRound() {
-    if(confirm("Starta nästa runda?")) {
+    if(confirm("Nästa runda?")) {
         players.forEach(p => p.scores = {});
         lastChangedCell = { pIdx: null, cat: null };
         localStorage.removeItem('statzy_scores');
@@ -279,8 +290,7 @@ function renderStaticRow(label, type, className) {
 }
 
 function calculateValues(pIdx) {
-    let sum = 0;
-    let diff = 0;
+    let sum = 0, diff = 0;
     upperCats.forEach((cat, idx) => {
         if (players[pIdx].scores[cat] !== undefined) {
             sum += players[pIdx].scores[cat];
@@ -293,6 +303,7 @@ function calculateValues(pIdx) {
 }
 
 function openInput(pIdx, cat) {
+    requestWakeLock();
     activePIdx = pIdx; activeCat = cat;
     const currentScore = players[pIdx].scores[cat];
     const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
@@ -313,12 +324,30 @@ function openInput(pIdx, cat) {
             const b = document.createElement('div'); b.className = 'quick-btn' + (currentScore === o ? ' already-selected' : '');
             b.innerText = o === 0 ? "/" : o; b.onclick = () => setScoreAndClose(o); grid.appendChild(b);
         });
-    } else { currentNumInput = currentScore !== undefined ? currentScore.toString() : ""; document.getElementById('num-display').innerText = currentNumInput || "-"; }
+    } else { 
+        currentNumInput = currentScore !== undefined ? currentScore.toString() : ""; 
+        document.getElementById('num-display').innerText = currentNumInput || "-"; 
+    }
 }
 
+// SPEED-INPUT LOGIK
 function pressNum(v) {
-    if (v === 'C') currentNumInput = ""; else if (currentNumInput.length < 2) currentNumInput += v;
+    if (v === 'C') {
+        currentNumInput = "";
+    } else {
+        if (currentNumInput.length < 2) currentNumInput += v;
+    }
     document.getElementById('num-display').innerText = currentNumInput || "-";
+    
+    // Auto-logga om första siffran är >= 5
+    const firstDigit = parseInt(currentNumInput[0]);
+    if (currentNumInput.length === 1 && firstDigit >= 5) {
+        confirmNumeric();
+    } 
+    // Auto-logga om det finns två siffror och de börjar på 0,1,2,3
+    else if (currentNumInput.length === 2 && [0,1,2,3].includes(firstDigit)) {
+        confirmNumeric();
+    }
 }
 
 function confirmNumeric() {
@@ -326,8 +355,10 @@ function confirmNumeric() {
     let min = 0, max = 30;
     if (activeCat === "Två par") { min = 6; max = 22; }
     if (activeCat === "Kåk") { min = 7; max = 28; }
-    if (isNaN(val) || val < min || val > max) { document.getElementById('err-msg').innerText = `Min ${min}, max ${max}`; } 
-    else { setScoreAndClose(val); }
+    if (isNaN(val) || val < min || val > max) { 
+        // Visa bara fel om det är en medveten bekräftelse (ej auto-log)
+        document.getElementById('err-msg').innerText = `Ogiltigt!`; 
+    } else { setScoreAndClose(val); }
 }
 
 function setScoreAndClose(v) {
@@ -336,7 +367,7 @@ function setScoreAndClose(v) {
     saveScores(); closeModal(); renderBoard();
 }
 
-function closeModal() { document.getElementById('modalInput').style.display = 'none'; document.getElementById('overlayInput').style.display = 'none'; }
+function closeModal() { document.getElementById('modalInput').style.display = 'none'; document.getElementById('overlayInput').style.display = 'none'; document.getElementById('err-msg').innerText = "";}
 
 function updatePrognosis() {
     const iter = 3000;
@@ -344,11 +375,7 @@ function updatePrognosis() {
     for (let i = 0; i < iter; i++) {
         let simScores = players.map(p => {
             let s = 0, uSum = 0;
-            upperCats.forEach(c => { 
-                let v = p.scores[c] !== undefined ? p.scores[c] : simulate(c, true); 
-                uSum += v; s += v; 
-            });
-            // Smartare bonus-simulering
+            upperCats.forEach(c => { let v = p.scores[c] !== undefined ? p.scores[c] : simulate(c, true); uSum += v; s += v; });
             if (uSum >= 63) s += 50;
             lowerCats.forEach(c => s += (p.scores[c] !== undefined ? p.scores[c] : simulate(c, false)));
             return s;
@@ -369,18 +396,12 @@ function simulate(cat, isUpper) {
     const r = Math.random();
     if (isUpper) {
         const val = upperCats.indexOf(cat) + 1;
-        // Simulera strategiskt spel: Chans till 4 stycken på högre nummer
-        if (val >= 4 && r > 0.7) return val * 4;
-        return r > 0.35 ? val * 3 : 0;
+        if (val >= 4 && r > 0.75) return val * 4;
+        return r > 0.4 ? val * 3 : 0;
     }
     switch(cat) {
-        case "Yatzy": return r < 0.05 ? 50 : 0; 
-        case "Liten stege": return r < 0.6 ? 15 : 0; 
-        case "Stor stege": return r < 0.5 ? 20 : 0;
-        case "Kåk": return r < 0.4 ? 24 : 0; 
-        case "Två par": return r < 0.8 ? 16 : 0; 
-        case "Chans": return 22; 
-        default: return 12;
+        case "Yatzy": return r < 0.05 ? 50 : 0; case "Liten stege": return r < 0.6 ? 15 : 0; case "Stor stege": return r < 0.5 ? 20 : 0;
+        case "Kåk": return r < 0.4 ? 24 : 0; case "Två par": return r < 0.8 ? 16 : 0; case "Chans": return 22; default: return 12;
     }
 }
 </script>
