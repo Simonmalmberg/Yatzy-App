@@ -2,7 +2,9 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Statzy - Strategic AI</title>
     <style>
         :root { 
@@ -14,15 +16,13 @@
         body.zoom-compact { --padd: 2px; --fs-base: 12px; --sb-h: 18px; --row-h: 24px; --prob-h: 18px; }
         body.zoom-tiny { --padd: 0px; --fs-base: 10px; --sb-h: 14px; --row-h: 18px; --prob-h: 14px; }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
         /* Setup Screen */
         #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
         .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
         input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
-        input[type="text"]:focus { border-color: var(--accent); }
-        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 12px; }
         .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
 
         /* Game Header */
@@ -32,43 +32,34 @@
         .settings-trigger { background: #222; border: none; color: #aaa; padding: 5px 8px; border-radius: 6px; font-size: 16px; }
 
         /* Table UI */
-        #score-container { display: block; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
         td:first-child { text-align: left; width: 38%; font-weight: 700; color: #888; padding-left: 6px; border-right: 1px solid #222; }
-        
         .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
         .sum-row { background: #111; color: #fff; font-size: 0.85em; }
         .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
 
-        /* AI Tips */
-        .critical-cell .score-box { border-color: #ffd700; box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
-        .critical-tag { position: absolute; top: -1px; right: 1px; font-size: 7px; color: #ffd700; font-weight: 900; text-transform: uppercase; }
-
-        /* TV MODE */
-        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
         /* Modals */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(5px); }
-        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; max-height: 90vh; }
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; border: 2px solid #3a3a3c; transition: all 0.2s; }
-        
-        /* Highlight för aktivt läge */
+        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
         .quick-btn.active-zoom { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 209, 255, 0.4); color: var(--accent); }
-        
-        #err-msg { color: var(--error); font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 16px; }
 
+        /* Settings Guide Styles */
         .settings-section { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; font-weight: bold; }
         .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
         .switch { width: 44px; height: 24px; background: #333; border-radius: 12px; position: relative; cursor: pointer; }
         .switch.on { background: var(--win); }
         .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .switch.on::after { left: 22px; }
+        
+        .guide-box { background: #111; padding: 12px; border-radius: 10px; font-size: 12px; line-height: 1.5; color: #aaa; }
+        .guide-box b { color: var(--accent); }
 
         .game-footer { padding: 15px 5px 30px 5px; text-align: center; display: none; }
-        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; box-shadow: 0 0 15px rgba(0, 209, 255, 0.4); }
+        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -77,7 +68,7 @@
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 2.7.0 PRO</div>
+    <div class="version-tag">VERSION 2.9.0 PRO</div>
     <br><br>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
@@ -106,22 +97,39 @@
     <div class="settings-section">
         <span class="settings-label">Zoom & Vy</span>
         <div class="quick-grid">
-            <button class="quick-btn zoom-opt" id="opt-zoom-normal" style="font-size:11px" onclick="setZoom('zoom-normal')">Standard</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-compact" style="font-size:11px" onclick="setZoom('zoom-compact')">Kompakt</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" style="font-size:11px" onclick="setZoom('zoom-tiny')">Minimal</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-normal" style="font-size:10px" onclick="setZoom('zoom-normal')">Standard</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-compact" style="font-size:10px" onclick="setZoom('zoom-compact')">Kompakt</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" style="font-size:10px" onclick="setZoom('zoom-tiny')">Minimal</button>
         </div>
     </div>
+    
     <div class="settings-section">
-        <span class="settings-label">AI & Funktioner</span>
+        <span class="settings-label">AI & Vy</span>
         <div class="toggle-row">
-            <span>Strategiska Tips</span>
+            <span>Strategiska AI-Tips</span>
             <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
         </div>
         <div class="toggle-row">
-            <span>TV-Läge</span>
+            <span>TV-Läge (Landscape)</span>
             <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
         </div>
+        <div class="toggle-row">
+            <span>Helskärm (Dölj webbläsare)</span>
+            <div class="switch" id="toggleFull" onclick="toggleFullscreen()"></div>
+        </div>
     </div>
+
+    <div class="settings-section">
+        <span class="settings-label">Pro-tips: Helskärm utan adressfält</span>
+        <div class="guide-box">
+            <b>iPhone:</b> Tryck på Dela-knappen (fyrkanten med pil) i Safari och välj <b>"Lägg till på hemskärmen"</b>.
+            <br><br>
+            <b>Android:</b> Tryck på de tre prickarna i Chrome och välj <b>"Installera app"</b> eller "Lägg till på startskärmen".
+            <br><br>
+            <i>Statzy körs nu som en riktig app för maximal spelyta!</i>
+        </div>
+    </div>
+
     <div class="settings-section" style="border:none">
         <button class="quick-btn" style="width:100%; background:#222; color:#888; border:none; font-size:14px" onclick="nextRound()">Tvinga: Nästa runda</button>
     </div>
@@ -135,8 +143,8 @@
         <button style="background:none; color:#666; border:none; margin-top:25px; width:100%; text-decoration:underline; font-weight:bold" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
     <div id="numeric-section" style="display:none;">
-        <div id="err-msg"></div>
-        <div id="num-display">-</div>
+        <div id="err-msg" style="color:red; text-align:center; font-size:12px; min-height:15px"></div>
+        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid #333">-</div>
         <div class="num-grid quick-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
             <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
@@ -160,9 +168,7 @@ window.onload = () => {
     const savedNames = localStorage.getItem('statzy_names');
     const savedScores = localStorage.getItem('statzy_scores');
     const savedZoom = localStorage.getItem('statzy_zoom') || 'zoom-compact';
-    
     setZoom(savedZoom);
-    
     if (savedNames) {
         JSON.parse(savedNames).forEach(n => addPlayerField(n));
         if (savedScores) {
@@ -181,8 +187,6 @@ function setZoom(mode) {
     document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
     document.body.classList.add(mode);
     localStorage.setItem('statzy_zoom', mode);
-    
-    // Uppdatera highlight på knapparna i modalen
     document.querySelectorAll('.zoom-opt').forEach(btn => btn.classList.remove('active-zoom'));
     const activeBtn = document.getElementById('opt-' + mode);
     if(activeBtn) activeBtn.classList.add('active-zoom');
@@ -198,9 +202,19 @@ function toggleOption(opt) {
     renderBoard();
 }
 
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => { console.log("Helskärm stöds ej"); });
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+    }
+    setTimeout(updateToggles, 100);
+}
+
 function updateToggles() {
     document.getElementById('toggleCritical').className = 'switch ' + (options.critical ? 'on' : '');
     document.getElementById('toggleTV').className = 'switch ' + (options.tv ? 'on' : '');
+    document.getElementById('toggleFull').className = 'switch ' + (document.fullscreenElement ? 'on' : '');
 }
 
 function addPlayerField(name) {
@@ -253,13 +267,13 @@ function renderBoard() {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
                 const isCrit = options.critical && p.criticalCat === cat;
-                return `<td class="${isCrit ? 'critical-cell' : ''}"><div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div>${isCrit ? '<span class="critical-tag">TIPS</span>' : ''}</td>`;
+                return `<td class="${isCrit ? 'critical-cell' : ''}"><div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
             }).join('')}</tr>`;
         });
         if(isUpper) {
             h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => {
                 const v = calculateValues(i);
-                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">${v.needed > 0 ? '(' + v.needed + ')' : 'OK'}</span></td>`;
+                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">(${v.needed > 0 ? v.needed : 'OK'})</span></td>`;
             }).join('')}</tr>`;
             h += renderStaticRow("Bonus", "bonus", "sum-row");
         } else {
