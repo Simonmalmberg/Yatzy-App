@@ -16,12 +16,14 @@
         
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        /* Setup */
-        #setup { text-align: center; padding-top: 30px; }
-        .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 8px 0; }
-        input[type="text"] { background: #1c1c1e; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 60%; font-size: 14px; }
-        .btn-main { background: var(--accent); border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; color: #000; width: 80%; font-size: 1.1em; }
-        .btn-round { background: var(--accent); border: none; padding: 8px 20px; border-radius: 8px; font-weight: 800; color: #000; font-size: 0.9em; }
+        /* Setup Screen */
+        #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
+        .version-tag { font-size: 11px; color: #444; font-weight: bold; margin-top: 5px; letter-spacing: 2px; }
+        .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
+        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
+        input[type="text"]:focus { border-color: var(--accent); }
+        .remove-btn { background: #2a1515; color: #ff6b6b; border: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 12px; }
+        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
 
         /* Game Header */
         header { position: sticky; top: 0; background: var(--bg); padding: 4px 5px; z-index: 10; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
@@ -29,7 +31,7 @@
         .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
         .settings-trigger { background: #222; border: none; color: #aaa; padding: 5px 8px; border-radius: 6px; font-size: 16px; }
 
-        /* Table UI - Mer kontrast */
+        /* Table UI */
         #score-container { display: block; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
@@ -39,7 +41,7 @@
         .sum-row { background: #111; color: #fff; font-size: 0.85em; }
         .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
 
-        /* Kritisk Ruta Highlight */
+        /* AI Tips */
         .critical-cell .score-box { border-color: #ffd700; box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
         .critical-tag { position: absolute; top: -1px; right: 1px; font-size: 7px; color: #ffd700; font-weight: 900; text-transform: uppercase; }
 
@@ -52,7 +54,6 @@
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; border: 1px solid #3a3a3c; }
         
-        /* Polisen: Felmeddelande */
         #err-msg { color: var(--error); font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 16px; }
 
         .settings-section { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
@@ -63,16 +64,21 @@
         .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .switch.on::after { left: 22px; }
 
-        .game-footer { padding: 15px 5px 30px 5px; text-align: center; }
+        .game-footer { padding: 15px 5px 30px 5px; text-align: center; display: none; }
+        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; box-shadow: 0 0 15px rgba(0, 209, 255, 0.4); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="zoom-compact">
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
+    <div class="version-tag">VERSION 2.6.0 PRO</div>
+    <br><br>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
-    <br><br>
+    <br><br><br>
     <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
 </div>
 
@@ -87,7 +93,7 @@
         <table id="tableLower"></table>
     </div>
 
-    <div class="game-footer">
+    <div class="game-footer" id="mainFooter">
         <button class="btn-round" onclick="nextRound()">NÄSTA RUNDA</button>
     </div>
 </div>
@@ -95,23 +101,26 @@
 <div class="overlay" id="overlaySettings" onclick="closeSettings()"></div>
 <div class="modal" id="modalSettings">
     <div class="settings-section">
-        <span class="settings-label">Zoom & Översikt</span>
+        <span class="settings-label">Zoom & Vy</span>
         <div class="quick-grid">
-            <button class="quick-btn" style="font-size:12px" onclick="setZoom('zoom-normal')">Standard</button>
-            <button class="quick-btn" style="font-size:12px" onclick="setZoom('zoom-compact')">Kompakt</button>
-            <button class="quick-btn" style="font-size:12px" onclick="setZoom('zoom-tiny')">Minimal</button>
+            <button class="quick-btn" style="font-size:11px" onclick="setZoom('zoom-normal')">Standard</button>
+            <button class="quick-btn" style="font-size:11px" onclick="setZoom('zoom-compact')">Kompakt</button>
+            <button class="quick-btn" style="font-size:11px" onclick="setZoom('zoom-tiny')">Minimal</button>
         </div>
     </div>
     <div class="settings-section">
-        <span class="settings-label">AI & Vy</span>
+        <span class="settings-label">AI & Funktioner</span>
         <div class="toggle-row">
-            <span>Visa Strategiska AI-Tips</span>
+            <span>Strategiska Tips</span>
             <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
         </div>
         <div class="toggle-row">
-            <span>TV-Läge (Landscape)</span>
+            <span>TV-Läge</span>
             <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
         </div>
+    </div>
+    <div class="settings-section" style="border:none">
+        <button class="quick-btn" style="width:100%; background:#222; color:#888; border:none; font-size:14px" onclick="nextRound()">Tvinga: Nästa runda</button>
     </div>
     <button class="btn-main" onclick="closeSettings()">KLAR</button>
 </div>
@@ -148,9 +157,7 @@ window.onload = () => {
     const savedNames = localStorage.getItem('statzy_names');
     const savedScores = localStorage.getItem('statzy_scores');
     const savedZoom = localStorage.getItem('statzy_zoom') || 'zoom-compact';
-    
     document.body.className = savedZoom;
-    
     if (savedNames) {
         JSON.parse(savedNames).forEach(n => addPlayerField(n));
         if (savedScores) {
@@ -166,20 +173,13 @@ window.onload = () => {
 };
 
 function setZoom(mode) {
-    document.body.className = mode;
-    if(options.tv) document.body.classList.add('mode-tv');
+    document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
+    document.body.classList.add(mode);
     localStorage.setItem('statzy_zoom', mode);
 }
 
-function openSettings() { 
-    document.getElementById('modalSettings').style.display = 'block'; 
-    document.getElementById('overlaySettings').style.display = 'block'; 
-}
-
-function closeSettings() { 
-    document.getElementById('modalSettings').style.display = 'none'; 
-    document.getElementById('overlaySettings').style.display = 'none'; 
-}
+function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
+function closeSettings() { document.getElementById('modalSettings').style.display = 'none'; document.getElementById('overlaySettings').style.display = 'none'; }
 
 function toggleOption(opt) {
     options[opt] = !options[opt];
@@ -217,7 +217,12 @@ function nextRound() {
     if(confirm("Starta nästa runda?")) {
         players.forEach(p => p.scores = {});
         localStorage.removeItem('statzy_scores');
-        renderBoard();
+        closeSettings();
+        document.getElementById('game').style.display = 'none';
+        document.getElementById('setup').style.display = 'block';
+        const list = document.getElementById('player-list');
+        list.innerHTML = "";
+        players.forEach(p => addPlayerField(p.name));
     }
 }
 
@@ -238,16 +243,13 @@ function renderBoard() {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
                 const isCrit = options.critical && p.criticalCat === cat;
-                return `<td class="${isCrit ? 'critical-cell' : ''}">
-                    <div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div>
-                    ${isCrit ? '<span class="critical-tag">TIPS</span>' : ''}
-                </td>`;
+                return `<td class="${isCrit ? 'critical-cell' : ''}"><div class="score-box" onclick="openInput(${i}, '${cat}')">${d}</div>${isCrit ? '<span class="critical-tag">TIPS</span>' : ''}</td>`;
             }).join('')}</tr>`;
         });
         if(isUpper) {
             h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => {
                 const v = calculateValues(i);
-                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">${v.needed > 0 ? '(' + v.needed + ' kvar)' : 'OK!'}</span></td>`;
+                return `<td style="font-weight:bold">${v.sum} <span style="font-size:8px; opacity:0.6">${v.needed > 0 ? '(' + v.needed + ')' : 'OK'}</span></td>`;
             }).join('')}</tr>`;
             h += renderStaticRow("Bonus", "bonus", "sum-row");
         } else {
@@ -257,7 +259,16 @@ function renderBoard() {
     };
     document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
     document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
+    
+    checkGameStatus();
     updatePrognosis();
+}
+
+// NY FUNKTION: Kollar om alla rutor är fyllda
+function checkGameStatus() {
+    const totalPossibleFields = upperCats.length + lowerCats.length;
+    const allFinished = players.every(p => Object.keys(p.scores).length === totalPossibleFields);
+    document.getElementById('mainFooter').style.display = allFinished ? 'block' : 'none';
 }
 
 function renderStaticRow(label, type, className) {
@@ -269,7 +280,6 @@ function openInput(pIdx, cat) {
     const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
     document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
     document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
-    document.getElementById('err-msg').innerText = "";
     if (!isNumeric) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
@@ -292,9 +302,7 @@ function openInput(pIdx, cat) {
 }
 
 function pressNum(v) {
-    document.getElementById('err-msg').innerText = "";
-    if (v === 'C') currentNumInput = "";
-    else if (currentNumInput.length < 2) currentNumInput += v;
+    if (v === 'C') currentNumInput = ""; else if (currentNumInput.length < 2) currentNumInput += v;
     document.getElementById('num-display').innerText = currentNumInput || "-";
 }
 
@@ -302,16 +310,11 @@ function confirmNumeric() {
     if (currentNumInput === "") return;
     const val = parseInt(currentNumInput);
     let min = 0, max = 30;
-    // YATZY-POLISEN ÅTERVÄNDER
     if (activeCat === "Två par") { min = 6; max = 22; }
     if (activeCat === "Kåk") { min = 7; max = 28; }
     if (activeCat === "Chans") { min = 5; max = 30; }
-
-    if (val < min || val > max) {
-        document.getElementById('err-msg').innerText = `FEL! Min ${min}, max ${max}.`;
-    } else {
-        setScoreAndClose(val);
-    }
+    if (val < min || val > max) { document.getElementById('err-msg').innerText = `Min ${min}, max ${max}`; } 
+    else { setScoreAndClose(val); }
 }
 
 function setScoreAndClose(v) {
@@ -335,29 +338,19 @@ function updatePrognosis() {
         });
         wins[simScores.indexOf(Math.max(...simScores))]++;
     }
-
-    // SMARTARE TIPS-LOGIK
     players.forEach((p, idx) => {
         const empty = [...upperCats, ...lowerCats].filter(c => p.scores[c] === undefined);
         const bonusInfo = calculateValues(idx);
-        
         if (empty.length > 0) {
-            // Prioritering 1: Bonus-säkring (6:or, 5:or, 4:or)
             if (bonusInfo.needed > 0) {
                 if (p.scores["Sexor"] === undefined) { p.criticalCat = "Sexor"; return; }
                 if (p.scores["Femmor"] === undefined) { p.criticalCat = "Femmor"; return; }
-                if (p.scores["Fyror"] === undefined) { p.criticalCat = "Fyror"; return; }
             }
-            // Prioritering 2: Stora poäng
             if (p.scores["Yatzy"] === undefined) { p.criticalCat = "Yatzy"; return; }
-            if (p.scores["Stor stege"] === undefined) { p.criticalCat = "Stor stege"; return; }
-            
-            // Slumpa bland resten men undvik 1:or och 2:or om möjligt
             const smartEmpty = empty.filter(c => c !== "Ettor" && c !== "Tvåor");
             p.criticalCat = smartEmpty.length > 0 ? smartEmpty[Math.floor(Math.random() * smartEmpty.length)] : empty[0];
         }
     });
-
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
     players.forEach((p, i) => {
         const pct = (wins[i] / iter) * 100;
@@ -375,13 +368,8 @@ function simulate(cat) {
         return r > 0.4 ? val * 3 : 0;
     }
     switch(cat) {
-        case "Yatzy": return r < 0.04 ? 50 : 0; 
-        case "Liten stege": return r < 0.5 ? 15 : 0;
-        case "Stor stege": return r < 0.4 ? 20 : 0;
-        case "Kåk": return r < 0.3 ? 22 : 0;
-        case "Två par": return r < 0.7 ? 16 : 0;
-        case "Chans": return 22; 
-        default: return 12;
+        case "Yatzy": return r < 0.04 ? 50 : 0; case "Liten stege": return r < 0.5 ? 15 : 0; case "Stor stege": return r < 0.4 ? 20 : 0;
+        case "Kåk": return r < 0.3 ? 22 : 0; case "Två par": return r < 0.7 ? 16 : 0; case "Chans": return 22; default: return 12;
     }
 }
 </script>
