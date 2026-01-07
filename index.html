@@ -52,7 +52,10 @@
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 90; backdrop-filter: blur(5px); }
         .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; }
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; border: 1px solid #3a3a3c; }
+        .quick-btn { background: #2c2c2e; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 20px; color: white; border: 2px solid #3a3a3c; transition: all 0.2s; }
+        
+        /* Highlight för aktivt läge */
+        .quick-btn.active-zoom { border-color: var(--accent); box-shadow: 0 0 12px rgba(0, 209, 255, 0.4); color: var(--accent); }
         
         #err-msg { color: var(--error); font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 16px; }
 
@@ -74,7 +77,7 @@
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
-    <div class="version-tag">VERSION 2.6.0 PRO</div>
+    <div class="version-tag">VERSION 2.7.0 PRO</div>
     <br><br>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
@@ -103,9 +106,9 @@
     <div class="settings-section">
         <span class="settings-label">Zoom & Vy</span>
         <div class="quick-grid">
-            <button class="quick-btn" style="font-size:11px" onclick="setZoom('zoom-normal')">Standard</button>
-            <button class="quick-btn" style="font-size:11px" onclick="setZoom('zoom-compact')">Kompakt</button>
-            <button class="quick-btn" style="font-size:11px" onclick="setZoom('zoom-tiny')">Minimal</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-normal" style="font-size:11px" onclick="setZoom('zoom-normal')">Standard</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-compact" style="font-size:11px" onclick="setZoom('zoom-compact')">Kompakt</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" style="font-size:11px" onclick="setZoom('zoom-tiny')">Minimal</button>
         </div>
     </div>
     <div class="settings-section">
@@ -157,7 +160,9 @@ window.onload = () => {
     const savedNames = localStorage.getItem('statzy_names');
     const savedScores = localStorage.getItem('statzy_scores');
     const savedZoom = localStorage.getItem('statzy_zoom') || 'zoom-compact';
-    document.body.className = savedZoom;
+    
+    setZoom(savedZoom);
+    
     if (savedNames) {
         JSON.parse(savedNames).forEach(n => addPlayerField(n));
         if (savedScores) {
@@ -176,6 +181,11 @@ function setZoom(mode) {
     document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
     document.body.classList.add(mode);
     localStorage.setItem('statzy_zoom', mode);
+    
+    // Uppdatera highlight på knapparna i modalen
+    document.querySelectorAll('.zoom-opt').forEach(btn => btn.classList.remove('active-zoom'));
+    const activeBtn = document.getElementById('opt-' + mode);
+    if(activeBtn) activeBtn.classList.add('active-zoom');
 }
 
 function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
@@ -259,12 +269,10 @@ function renderBoard() {
     };
     document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
     document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
-    
     checkGameStatus();
     updatePrognosis();
 }
 
-// NY FUNKTION: Kollar om alla rutor är fyllda
 function checkGameStatus() {
     const totalPossibleFields = upperCats.length + lowerCats.length;
     const allFinished = players.every(p => Object.keys(p.scores).length === totalPossibleFields);
@@ -278,6 +286,8 @@ function renderStaticRow(label, type, className) {
 function openInput(pIdx, cat) {
     activePIdx = pIdx; activeCat = cat;
     const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
+    document.getElementById('modalInput').style.display = 'block';
+    document.getElementById('overlayInput').style.display = 'block';
     document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
     document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
     if (!isNumeric) {
@@ -297,8 +307,6 @@ function openInput(pIdx, cat) {
             grid.appendChild(b);
         });
     } else { currentNumInput = ""; document.getElementById('num-display').innerText = "-"; }
-    document.getElementById('modalInput').style.display = 'block';
-    document.getElementById('overlayInput').style.display = 'block';
 }
 
 function pressNum(v) {
