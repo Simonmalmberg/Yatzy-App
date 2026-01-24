@@ -5,166 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Statzy - Strategic AI</title>
+    <title>Statzy - Elite Yatzy</title>
     <style>
         :root { 
             --bg: #0d0d0d; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
-            --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px;
+            --padd: 8px; --fs-base: 14px; --sb-h: 22px; --row-h: 38px; --prob-h: 22px;
         }
 
-        body.zoom-normal { --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px; }
-        body.zoom-compact { --padd: 2px; --fs-base: 12px; --sb-h: 18px; --row-h: 24px; --prob-h: 18px; }
-        body.zoom-tiny { --padd: 0px; --fs-base: 10px; --sb-h: 14px; --row-h: 18px; --prob-h: 14px; }
+        body.zoom-normal { --padd: 8px; --fs-base: 14px; --sb-h: 22px; --row-h: 38px; }
+        body.zoom-compact { --padd: 4px; --fs-base: 12px; --sb-h: 20px; --row-h: 32px; }
+        body.zoom-tiny { --padd: 1px; --fs-base: 11px; --sb-h: 18px; --row-h: 28px; }
         
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
+        /* Setup */
+        #setup { text-align: center; padding-top: 30px; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
-        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
+        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
         .remove-btn { background: #451010; color: #ff3b30; border: 1px solid #631414; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 11px; }
-        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
+        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; margin-top: 20px; }
 
-        header { position: sticky; top: 0; background: var(--bg); padding: 4px 5px; z-index: 10; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
-        .prob-bar { flex-grow: 1; display: flex; height: var(--prob-h); background: #111; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
-        .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
-        .settings-trigger { background: #222; border: none; color: #aaa; padding: 5px 8px; border-radius: 6px; font-size: 16px; }
-
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
-        td:first-child { text-align: left; width: 35%; font-weight: 700; color: #999; padding-left: 10px; border-right: 1px solid #222; }
-        body.mode-tv td:first-child { padding-left: calc(env(safe-area-inset-left) + 20px); }
-
-        .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
-        .last-changed-box { border: 2px solid #fff !important; box-shadow: 0 0 10px rgba(255,255,255,0.4); z-index: 2; animation: pulseBorder 2s infinite; }
-        @keyframes pulseBorder { 50% { border-color: rgba(255,255,255,1); box-shadow: 0 0 15px rgba(255,255,255,0.6); } }
-
-        .sum-row { background: #111; color: #fff; font-size: 0.85em; }
-        .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
-
-        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.94); z-index: 90; backdrop-filter: blur(8px); }
-        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 100; border-radius: 20px 20px 0 0; padding: 15px; box-sizing: border-box; border-top: 1px solid #333; }
-        .modal-cat-name { font-size: 1.2em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; }
-        .modal-player-name { font-size: 0.9em; color: #888; text-align: center; margin-bottom: 10px; }
-
-        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 400px; margin: 0 auto; }
-        .quick-btn { background: #2c2c2e; padding: 12px; border-radius: 10px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
-        .quick-btn.active-zoom { border-color: var(--accent); }
-        .already-selected { background: var(--accent) !important; color: #000 !important; }
-
-        #num-display { background: #000; color: var(--accent); font-size: 32px; text-align: center; padding: 5px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; min-height: 40px; max-width: 400px; margin-left: auto; margin-right: auto; }
+        /* Game UI */
+        header { position: sticky; top: 0; background: var(--bg); padding: 5px; z-index: 100; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
+        .prob-bar { flex-grow: 1; display: flex; height: var(--prob-h); background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
+        .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
         
-        .clear-btn { background: none; color: #666; border: none; margin-top: 15px; width: 100%; text-decoration: underline; font-weight: bold; font-size: 14px; padding: 10px; }
-
-        @media (orientation: landscape) {
-            .num-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 280px; }
-            .modal { padding: 8px 15px; overflow-y: auto; height: 100%; max-height: 100vh; border-radius: 0; }
-            .clear-btn { margin-top: 5px; padding: 5px; }
-            #num-display { max-width: 280px; font-size: 24px; padding: 2px; margin-bottom: 5px; }
+        /* Tables & Sticky Labels */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 300px; }
+        td, th { padding: var(--padd) 2px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
+        
+        /* STICKY COLUMN FIX */
+        td:first-child, th:first-child { 
+            position: sticky; left: 0; z-index: 10; background: var(--bg); 
+            text-align: left; width: 90px; font-weight: 700; color: #999; 
+            padding-left: 10px; border-right: 2px solid #222;
         }
 
-        .settings-section { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; font-weight: bold; }
-        .switch { width: 44px; height: 24px; background: #333; border-radius: 12px; position: relative; cursor: pointer; }
-        .switch.on { background: var(--win); }
-        .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
-        .switch.on::after { left: 22px; }
+        .score-box { background: #1a1a1c; border-radius: 6px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .last-changed-box { border: 2px solid #fff !important; animation: pulseBorder 2s infinite; z-index: 5; }
         
-        .game-footer { padding: 15px; text-align: center; display: none; }
-        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Turn Indicator */
+        .active-turn-head { color: #fff !important; text-decoration: underline; text-underline-offset: 4px; animation: pulseTurn 1.5s infinite; }
+        @keyframes pulseTurn { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        @keyframes pulseBorder { 50% { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); } }
+
+        /* TV Mode Splits */
+        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 5px; }
+
+        /* Modals */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; backdrop-filter: blur(10px); }
+        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 1001; border-radius: 24px 24px 0 0; padding: 20px; box-sizing: border-box; border-top: 1px solid #444; }
+        
+        .modal-cat-name { font-size: 1.4em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; }
+        .modal-player-name { font-size: 1em; color: #888; text-align: center; margin-bottom: 20px; }
+
+        /* Input Grids */
+        .dice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .dice-btn { background: #2c2c2e; border: 2px solid #3a3a3c; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .dice-btn span { font-size: 20px; color: #fff; }
+        .dice-btn small { font-size: 14px; font-weight: 900; color: var(--accent); }
+        .dice-btn.active { border-color: var(--accent); background: #1a3a4a; }
+        .dice-btn.zero { background: #451010; border-color: #631414; }
+
+        /* Ladder Buttons */
+        .ladder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .ladder-btn { border-radius: 16px; padding: 30px 10px; text-align: center; font-weight: 900; font-size: 1.2em; border: none; }
+        .l-win { background: var(--win); color: #000; }
+        .l-fail { background: var(--error); color: #fff; }
+
+        /* TV Popups */
+        #tv-emoji { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 120px; z-index: 2000; pointer-events: none; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #tv-emoji.show { transform: translate(-50%, -50%) scale(1); }
+
+        .clear-btn { background: none; color: #555; border: none; margin-top: 20px; width: 100%; text-decoration: underline; font-size: 14px; }
+
+        @media (orientation: landscape) {
+            .modal { overflow-y: auto; height: 100%; border-radius: 0; padding: 10px 40px; }
+            .dice-grid { grid-template-columns: repeat(6, 1fr); }
+            .ladder-btn { padding: 15px; }
+        }
     </style>
 </head>
-<body class="zoom-compact">
+<body>
+
+<div id="tv-emoji"></div>
 
 <div id="setup">
     <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
-    <br><br>
+    <br>
     <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
 </div>
 
 <div id="game" style="display:none;">
     <header>
-        <button class="settings-trigger" onclick="openSettings()">⚙️</button>
+        <button style="background:#222; border:none; color:#aaa; padding:8px 12px; border-radius:8px;" onclick="openSettings()">⚙️</button>
         <div class="prob-bar" id="probBar"></div>
     </header>
+    
     <div id="score-container">
-        <table id="tableUpper"></table>
-        <table id="tableLower"></table>
+        <div class="table-wrap"><table id="tableUpper"></table></div>
+        <div class="table-wrap"><table id="tableLower"></table></div>
     </div>
-    <div class="game-footer" id="mainFooter">
-        <button class="btn-round" onclick="nextRound()">NÄSTA RUNDA</button>
+
+    <div class="game-footer" id="mainFooter" style="text-align:center; padding:20px; display:none;">
+        <button class="btn-main" onclick="nextRound()" style="background:var(--win)">NÄSTA RUNDA</button>
     </div>
 </div>
 
 <div class="overlay" id="overlaySettings" onclick="closeSettings()"></div>
 <div class="modal" id="modalSettings">
-    <div class="settings-section">
-        <span class="settings-label">Zoom & Vy</span>
-        <div class="quick-grid">
-            <button class="quick-btn zoom-opt" id="opt-zoom-normal" onclick="setZoom('zoom-normal')">STD</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-compact" onclick="setZoom('zoom-compact')">KOMP</button>
-            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" onclick="setZoom('zoom-tiny')">MINI</button>
-        </div>
+    <h2 style="text-align:center">Inställningar</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+        <button class="quick-btn" onclick="setZoom('zoom-normal')">STD</button>
+        <button class="quick-btn" onclick="setZoom('zoom-compact')">KOMP</button>
+        <button class="quick-btn" onclick="setZoom('zoom-tiny')">MINI</button>
     </div>
-    <div class="settings-section">
-        <span class="settings-label">Inställningar</span>
-        <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
-            <span>Strategiska Tips</span>
-            <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
-        </div>
-        <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
-            <span>TV-Läge</span>
-            <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
-        </div>
-        <div id="wakeIndicator" style="font-size:10px; color:var(--win); font-weight:bold;">Skärmlås: AKTIVT 🟢</div>
-    </div>
-    <div class="settings-section" style="border:none">
-        <button class="quick-btn" style="width:100%; background:#2a1515; color:#ff6b6b; border:1px solid #451010; font-size:14px" onclick="nextRound()">NÄSTA RUNDA (TVINGA)</button>
-    </div>
-    <button class="btn-main" onclick="closeSettings()">KLAR</button>
+    <button class="btn-main" style="width:100%; background:var(--error); color:#fff;" onclick="nextRound()">AVSLUTA MATCH (TVINGA)</button>
+    <button class="btn-main" style="width:100%" onclick="closeSettings()">KLAR</button>
 </div>
 
 <div class="overlay" id="overlayInput" onclick="closeModal()"></div>
 <div class="modal" id="modalInput">
-    <div id="modalInputTitle"></div>
-    <div id="quick-pick-section">
-        <div class="quick-grid" id="quickGrid"></div>
-        <button class="clear-btn" onclick="setScoreAndClose(null)">Rensa ruta</button>
+    <div id="modalHeader"></div>
+    
+    <div id="dice-input" style="display:none;">
+        <div class="dice-grid" id="diceGrid"></div>
     </div>
-    <div id="numeric-section" style="display:none;">
-        <div id="err-msg" style="color:red; text-align:center; font-size:12px; min-height:15px"></div>
-        <div id="num-display">-</div>
-        <div class="num-grid quick-grid">
+
+    <div id="ladder-input" style="display:none;">
+        <div class="ladder-grid">
+            <button class="ladder-btn l-win" onclick="handleLadder(true)">LYCKAD ✅</button>
+            <button class="ladder-btn l-fail" onclick="handleLadder(false)">MISSAD ❌</button>
+        </div>
+    </div>
+
+    <div id="numeric-input" style="display:none;">
+        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:12px; margin-bottom:15px; border:1px solid #333">-</div>
+        <div class="dice-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
             <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
             <div class="quick-btn" onclick="pressNum(7)">7</div><div class="quick-btn" onclick="pressNum(8)">8</div><div class="quick-btn" onclick="pressNum(9)">9</div>
             <div class="quick-btn" style="background:#444" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
-            <div class="quick-btn" style="background:var(--win); color:black" onclick="confirmNumeric()">OK</div>
+            <div class="quick-btn" style="background:var(--win); color:#000" onclick="confirmNumeric()">OK</div>
         </div>
-        <button class="clear-btn" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
+
+    <button class="clear-btn" onclick="setScoreAndClose(null)">Rensa ruta</button>
 </div>
 
 <script>
 let players = [];
-let options = { critical: false, tv: false };
 let activePIdx = null, activeCat = null, currentNumInput = "";
 let lastChangedCell = { pIdx: null, cat: null };
-let wakeLock = null;
+let currentPlayerTurn = 0;
 
 const upperCats = ["Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor"];
 const lowerCats = ["Ett par", "Två par", "Triss", "Fyrtal", "Liten stege", "Stor stege", "Kåk", "Chans", "Yatzy"];
-const colors = ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"];
+const diceIcons = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 
 window.onload = () => {
     const savedNames = localStorage.getItem('statzy_names');
     const savedScores = localStorage.getItem('statzy_scores');
-    const savedZoom = localStorage.getItem('statzy_zoom') || 'zoom-compact';
-    setZoom(savedZoom);
     if (savedNames) {
         JSON.parse(savedNames).forEach(n => addPlayerField(n));
         if (savedScores) {
@@ -173,120 +177,176 @@ window.onload = () => {
             document.getElementById('game').style.display = 'block';
             renderBoard();
         }
-    } else { addPlayerField('Spelare 1'); addPlayerField('Spelare 2'); }
-    updateToggles();
+    } else {
+        addPlayerField('Spelare 1'); addPlayerField('Spelare 2');
+    }
 };
-
-async function requestWakeLock() {
-    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-}
-
-function setZoom(mode) {
-    document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
-    document.body.classList.add(mode);
-    localStorage.setItem('statzy_zoom', mode);
-    document.querySelectorAll('.zoom-opt').forEach(btn => btn.classList.remove('active-zoom'));
-    const activeBtn = document.getElementById('opt-' + mode);
-    if(activeBtn) activeBtn.classList.add('active-zoom');
-    if(players.length > 0) renderBoard();
-}
-
-function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
-function closeSettings() { document.getElementById('modalSettings').style.display = 'none'; document.getElementById('overlaySettings').style.display = 'none'; }
-
-function toggleOption(opt) {
-    options[opt] = !options[opt];
-    if(opt === 'tv') document.body.classList.toggle('mode-tv', options.tv);
-    updateToggles();
-    renderBoard();
-}
-
-function updateToggles() {
-    document.getElementById('toggleCritical').className = 'switch ' + (options.critical ? 'on' : '');
-    document.getElementById('toggleTV').className = 'switch ' + (options.tv ? 'on' : '');
-}
 
 function addPlayerField(name) {
     const div = document.createElement('div');
     div.className = 'player-row';
-    const isDefault = name.startsWith('Spelare ');
-    div.innerHTML = `<input type="text" placeholder="${isDefault ? name : 'Namn'}" value="${isDefault ? '' : name}">
-        <button class="remove-btn" onclick="this.parentElement.remove()">TA BORT</button>`;
+    div.innerHTML = `<input type="text" placeholder="Namn" value="${name}">
+        <button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
     document.getElementById('player-list').appendChild(div);
 }
 
 function startGame() {
     const inputs = document.querySelectorAll('#player-list input');
-    let rawNames = Array.from(inputs).map((i, idx) => i.value || i.placeholder || `Spelare ${idx+1}`);
-    let nameCounts = {};
-    let uniqueNames = rawNames.map(name => {
-        nameCounts[name] = (nameCounts[name] || 0) + 1;
-        if (rawNames.filter(n => n === name).length > 1) return `${name} ${nameCounts[name]}`;
-        return name;
-    });
-    players = uniqueNames.map((name, i) => ({ name: name, scores: {}, color: colors[i % colors.length] }));
-    localStorage.setItem('statzy_names', JSON.stringify(uniqueNames));
-    saveScores();
+    players = Array.from(inputs).map((i, idx) => ({
+        name: i.value || `S${idx+1}`,
+        scores: {},
+        color: ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"][idx % 6]
+    }));
+    localStorage.setItem('statzy_names', JSON.stringify(players.map(p => p.name)));
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
-    requestWakeLock();
     renderBoard();
-}
-
-function nextRound() {
-    if(confirm("Starta nästa runda?")) {
-        players.forEach(p => p.scores = {});
-        lastChangedCell = { pIdx: null, cat: null };
-        localStorage.removeItem('statzy_scores');
-        closeSettings();
-        document.getElementById('game').style.display = 'none';
-        document.getElementById('setup').style.display = 'block';
-        const list = document.getElementById('player-list');
-        list.innerHTML = "";
-        players.forEach(p => addPlayerField(p.name));
-    }
-}
-
-function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(players)); }
-
-function getTableDisplayName(name) {
-    const zoom = document.body.className;
-    if (zoom === 'zoom-normal' && players.length <= 3) return name.substring(0, 6);
-    return name.substring(0, 2).toUpperCase();
 }
 
 function renderBoard() {
     const renderTable = (cats, isUpper) => {
-        let h = `<thead><tr><th></th>${players.map(p => `<th style="color:${p.color}">${getTableDisplayName(p.name)}</th>`).join('')}</tr></thead><tbody>`;
+        let h = `<thead><tr><th></th>${players.map((p, i) => 
+            `<th style="color:${p.color}" class="${currentPlayerTurn === i ? 'active-turn-head' : ''}">${p.name}</th>`).join('')}</tr></thead><tbody>`;
+        
         cats.forEach(cat => {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
-                let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
-                const isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
-                return `<td class="${options.critical && p.criticalCat === cat ? 'critical-cell' : ''}"><div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
+                let val = p.scores[cat];
+                let display = val === undefined ? "" : (val === 0 ? "/" : val);
+                let isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
+                return `<td><div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${display}</div></td>`;
             }).join('')}</tr>`;
         });
+
         if(isUpper) {
-            h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => {
+            h += `<tr style="background:#111"><td>± Par</td>${players.map((p, i) => {
                 const v = calculateValues(i);
-                let diffText = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
-                return `<td style="font-weight:bold">${v.sum} <span style="font-size:9px; opacity:0.8; color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">(${diffText})</span></td>`;
+                let diff = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
+                return `<td style="color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">${diff}</td>`;
             }).join('')}</tr>`;
-            h += renderStaticRow("Bonus", "bonus", "sum-row");
-        } else { h += renderStaticRow("TOTALT", "total", "total-row"); }
-        return h + `</tbody>`;
+            h += `<tr style="background:#000; border-top:1px solid #333"><td>Bonus</td>${players.map((p, i) => `<td>${calculateValues(i).bonus}</td>`).join('')}</tr>`;
+        } else {
+            h += `<tr style="background:#000; color:var(--accent); font-weight:900"><td>TOTALT</td>${players.map((p, i) => `<td>${calculateValues(i).total}</td>`).join('')}</tr>`;
+        }
+        return h + "</tbody>";
     };
+
     document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
     document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
-    checkGameStatus(); updatePrognosis();
+    updatePrognosis();
+    checkGameOver();
 }
 
-function checkGameStatus() {
-    const allFinished = players.every(p => Object.keys(p.scores).length === 15);
-    document.getElementById('mainFooter').style.display = allFinished ? 'block' : 'none';
+function openInput(pIdx, cat) {
+    // 1. Varning om man skippar tur
+    if (pIdx !== currentPlayerTurn) {
+        if (!confirm(`Det är egentligen ${players[currentPlayerTurn].name}s tur. Vill du ändra för ${players[pIdx].name} ändå?`)) return;
+    }
+
+    // 2. Varning om överskrivning
+    if (players[pIdx].scores[cat] !== undefined) {
+        if (!confirm(`Det finns redan poäng här (${players[pIdx].scores[cat]}). Vill du ändra?`)) return;
+    }
+
+    activePIdx = pIdx; activeCat = cat;
+    document.getElementById('modalHeader').innerHTML = `<div class="modal-cat-name">${cat}</div><div class="modal-player-name">${players[pIdx].name}</div>`;
+    
+    document.getElementById('overlayInput').style.display = 'block';
+    document.getElementById('modalInput').style.display = 'block';
+
+    const diceInp = document.getElementById('dice-input');
+    const laddInp = document.getElementById('ladder-input');
+    const numInp = document.getElementById('numeric-input');
+    
+    diceInp.style.display = 'none'; laddInp.style.display = 'none'; numInp.style.display = 'none';
+
+    if (upperCats.includes(cat)) {
+        diceInp.style.display = 'block';
+        renderDiceGrid(upperCats.indexOf(cat) + 1, 5);
+    } else if (["Ett par", "Triss", "Fyrtal"].includes(cat)) {
+        diceInp.style.display = 'block';
+        renderSpecialDice(cat);
+    } else if (cat.includes("stege") || cat === "Yatzy") {
+        laddInp.style.display = 'block';
+    } else {
+        numInp.style.display = 'block';
+        currentNumInput = "";
+        document.getElementById('num-display').innerText = "-";
+    }
 }
 
-function renderStaticRow(label, type, className) {
-    return `<tr class="${className}"><td>${label}</td>${players.map((p, i) => `<td style="font-weight:bold">${calculateValues(i)[type]}</td>`).join('')}</tr>`;
+function renderDiceGrid(dieVal, max) {
+    const grid = document.getElementById('diceGrid');
+    grid.innerHTML = `<div class="dice-btn zero" onclick="setScoreAndClose(0)"><span>❌</span><small>0</small></div>`;
+    for (let i = 1; i <= max; i++) {
+        let diceStr = ""; for(let d=0; d<i; d++) diceStr += diceIcons[dieVal];
+        grid.innerHTML += `<div class="dice-btn" onclick="setScoreAndClose(${i * dieVal})"><span>${diceStr}</span><small>${i * dieVal}</small></div>`;
+    }
+}
+
+function renderSpecialDice(cat) {
+    const grid = document.getElementById('diceGrid');
+    grid.innerHTML = `<div class="dice-btn zero" onclick="setScoreAndClose(0)"><span>❌</span><small>0</small></div>`;
+    let count = cat === "Ett par" ? 2 : (cat === "Triss" ? 3 : 4);
+    for (let v = 1; v <= 6; v++) {
+        let diceStr = ""; for(let d=0; d<count; d++) diceStr += diceIcons[v];
+        grid.innerHTML += `<div class="dice-btn" onclick="setScoreAndClose(${v * count})"><span>${diceStr}</span><small>${v * count}</small></div>`;
+    }
+}
+
+function handleLadder(success) {
+    let score = 0;
+    if (success) {
+        if (activeCat === "Liten stege") score = 15;
+        else if (activeCat === "Stor stege") score = 20;
+        else if (activeCat === "Yatzy") score = 50;
+    }
+    setScoreAndClose(score);
+}
+
+function pressNum(v) {
+    if (v === 'C') currentNumInput = ""; 
+    else if (currentNumInput.length < 2) currentNumInput += v;
+    document.getElementById('num-display').innerText = currentNumInput || "-";
+    
+    // Auto-log
+    if (currentNumInput.length === 1 && parseInt(v) >= 5) confirmNumeric();
+    else if (currentNumInput.length === 2) confirmNumeric();
+}
+
+function confirmNumeric() {
+    const val = parseInt(currentNumInput);
+    if (isNaN(val)) return;
+    setScoreAndClose(val);
+}
+
+function setScoreAndClose(score) {
+    if (score === null) {
+        delete players[activePIdx].scores[activeCat];
+    } else {
+        players[activePIdx].scores[activeCat] = score;
+        lastChangedCell = { pIdx: activePIdx, cat: activeCat };
+        triggerEmoji(score, activeCat);
+        // Flytta turen till nästa spelare
+        currentPlayerTurn = (activePIdx + 1) % players.length;
+    }
+    saveScores();
+    closeModal();
+    renderBoard();
+}
+
+function triggerEmoji(score, cat) {
+    const el = document.getElementById('tv-emoji');
+    let emo = "👍";
+    if (score === 0) emo = "💀";
+    else if (score === 50) emo = "🔥👑🔥";
+    else if (upperCats.includes(cat)) {
+        const val = upperCats.indexOf(cat) + 1;
+        if (score === val * 5) emo = "🤩";
+        if (score === val * 4) emo = "🔥";
+    }
+    el.innerText = emo;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1500);
 }
 
 function calculateValues(pIdx) {
@@ -302,88 +362,33 @@ function calculateValues(pIdx) {
     return { sum, bonus, total, diff };
 }
 
-function openInput(pIdx, cat) {
-    requestWakeLock();
-    activePIdx = pIdx; activeCat = cat;
-    const currentScore = players[pIdx].scores[cat];
-    const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
-    document.getElementById('modalInputTitle').innerHTML = `<div class="modal-cat-name">${cat}</div><div class="modal-player-name">${players[pIdx].name}</div>`;
-    document.getElementById('modalInput').style.display = 'block';
-    document.getElementById('overlayInput').style.display = 'block';
-    document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
-    document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
-    if (!isNumeric) {
-        const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
-        let opts = [0];
-        if (upperCats.includes(cat)) { const v = upperCats.indexOf(cat)+1; for(let j=1; j<=5; j++) opts.push(v*j); }
-        else if (cat === "Ett par") [2,4,6,8,10,12].forEach(v => opts.push(v));
-        else if (cat === "Triss") [3,6,9,12,15,18].forEach(v => opts.push(v));
-        else if (cat === "Fyrtal") [4,8,12,16,20,24].forEach(v => opts.push(v));
-        else if (cat === "Liten stege") opts.push(15); else if (cat === "Stor stege") opts.push(20); else if (cat === "Yatzy") opts.push(50);
-        opts.sort((a,b)=>a-b).forEach(o => {
-            const b = document.createElement('div'); b.className = 'quick-btn' + (currentScore === o ? ' already-selected' : '');
-            b.innerText = o === 0 ? "/" : o; b.onclick = () => setScoreAndClose(o); grid.appendChild(b);
-        });
-    } else { currentNumInput = currentScore !== undefined ? currentScore.toString() : ""; document.getElementById('num-display').innerText = currentNumInput || "-"; }
-}
-
-function pressNum(v) {
-    if (v === 'C') currentNumInput = ""; else if (currentNumInput.length < 2) currentNumInput += v;
-    document.getElementById('num-display').innerText = currentNumInput || "-";
-    const firstDigit = parseInt(currentNumInput[0]);
-    if (currentNumInput.length === 1 && firstDigit >= 5) confirmNumeric();
-    else if (currentNumInput.length === 2 && [0,1,2,3,4].includes(firstDigit)) confirmNumeric();
-}
-
-function confirmNumeric() {
-    if (currentNumInput === "") return;
-    const val = parseInt(currentNumInput);
-    let min = 0, max = 30;
-    if (activeCat === "Två par") { min = 6; max = 22; }
-    if (activeCat === "Kåk") { min = 7; max = 28; }
-    if (isNaN(val) || val < min || val > max) { document.getElementById('err-msg').innerText = `Ogiltigt!`; } 
-    else { setScoreAndClose(val); }
-}
-
-function setScoreAndClose(v) {
-    if (v === null) { delete players[activePIdx].scores[activeCat]; lastChangedCell = { pIdx: null, cat: null }; }
-    else { players[activePIdx].scores[activeCat] = v; lastChangedCell = { pIdx: activePIdx, cat: activeCat }; }
-    saveScores(); closeModal(); renderBoard();
-}
-
-function closeModal() { document.getElementById('modalInput').style.display = 'none'; document.getElementById('overlayInput').style.display = 'none'; document.getElementById('err-msg').innerText = "";}
-
 function updatePrognosis() {
-    const iter = 3000;
-    let wins = new Array(players.length).fill(0);
-    for (let i = 0; i < iter; i++) {
-        let simScores = players.map(p => {
-            let s = 0, uSum = 0;
-            upperCats.forEach(c => { let v = p.scores[c] !== undefined ? p.scores[c] : simulate(c, true); uSum += v; s += v; });
-            if (uSum >= 63) s += 50;
-            lowerCats.forEach(c => s += (p.scores[c] !== undefined ? p.scores[c] : simulate(c, false)));
-            return s;
-        });
-        wins[simScores.indexOf(Math.max(...simScores))]++;
-    }
-    const bar = document.getElementById('probBar'); bar.innerHTML = "";
+    // Simpel simulering för stapeln
+    const bar = document.getElementById('probBar');
+    bar.innerHTML = "";
+    let totals = players.map((p, i) => calculateValues(i).total + (15 - Object.keys(p.scores).length) * 10);
+    let sumTotal = totals.reduce((a, b) => a + b, 0);
     players.forEach((p, i) => {
-        const pct = (wins[i] / iter) * 100;
-        const div = document.createElement('div'); div.className = "prob-seg";
-        div.style.width = pct + "%"; div.style.backgroundColor = p.color;
-        div.innerText = pct > 12 ? Math.round(pct) + "%" : "";
-        bar.appendChild(div);
+        let pct = (totals[i] / sumTotal) * 100;
+        bar.innerHTML += `<div class="prob-seg" style="width:${pct}%; background:${p.color}">${Math.round(pct)}%</div>`;
     });
 }
 
-function simulate(cat, isUpper) {
-    const r = Math.random();
-    if (isUpper) { const val = upperCats.indexOf(cat) + 1; if (val >= 4 && r > 0.75) return val * 4; return r > 0.4 ? val * 3 : 0; }
-    switch(cat) {
-        case "Yatzy": return r < 0.05 ? 50 : 0; case "Liten stege": return r < 0.6 ? 15 : 0; case "Stor stege": return r < 0.5 ? 20 : 0;
-        case "Kåk": return r < 0.4 ? 24 : 0; case "Två par": return r < 0.8 ? 16 : 0; case "Chans": return 22; default: return 12;
-    }
+function checkGameOver() {
+    const isDone = players.every(p => Object.keys(p.scores).length === 15);
+    document.getElementById('mainFooter').style.display = isDone ? 'block' : 'none';
 }
+
+function closeModal() { 
+    document.getElementById('overlayInput').style.display = 'none'; 
+    document.getElementById('modalInput').style.display = 'none'; 
+}
+function openSettings() { document.getElementById('overlaySettings').style.display = 'block'; document.getElementById('modalSettings').style.display = 'block'; }
+function closeSettings() { document.getElementById('overlaySettings').style.display = 'none'; document.getElementById('modalSettings').style.display = 'none'; }
+function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(players)); }
+function nextRound() { if(confirm("Starta ny runda?")) { localStorage.removeItem('statzy_scores'); location.reload(); } }
+function setZoom(z) { document.body.className = z; }
 </script>
+
 </body>
 </html>
