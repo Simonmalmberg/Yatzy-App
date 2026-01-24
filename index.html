@@ -18,8 +18,7 @@
         
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
-        /* Setup */
-        #setup { text-align: center; padding-top: 30px; }
+        #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
         input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
         .remove-btn { background: #451010; color: #ff3b30; border: 1px solid #631414; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 11px; }
@@ -30,23 +29,23 @@
         .prob-bar { flex-grow: 1; display: flex; height: var(--prob-h); background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
         .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
         
-        /* Tables & Sticky Labels */
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 300px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 320px; }
         td, th { padding: var(--padd) 2px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
         
-        /* STICKY COLUMN FIX */
+        /* STICKY COLUMN: Kategoritexter alltid synliga */
         td:first-child, th:first-child { 
             position: sticky; left: 0; z-index: 10; background: var(--bg); 
-            text-align: left; width: 90px; font-weight: 700; color: #999; 
+            text-align: left; width: 95px; font-weight: 700; color: #999; 
             padding-left: 10px; border-right: 2px solid #222;
         }
 
         .score-box { background: #1a1a1c; border-radius: 6px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .last-changed-box { border: 2px solid #fff !important; animation: pulseBorder 2s infinite; z-index: 5; }
         
         /* Turn Indicator */
         .active-turn-head { color: #fff !important; text-decoration: underline; text-underline-offset: 4px; animation: pulseTurn 1.5s infinite; }
+        .last-changed-box { border: 2px solid #fff !important; animation: pulseBorder 2s infinite; z-index: 5; }
+        
         @keyframes pulseTurn { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         @keyframes pulseBorder { 50% { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); } }
 
@@ -65,16 +64,14 @@
         .dice-btn { background: #2c2c2e; border: 2px solid #3a3a3c; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .dice-btn span { font-size: 20px; color: #fff; }
         .dice-btn small { font-size: 14px; font-weight: 900; color: var(--accent); }
-        .dice-btn.active { border-color: var(--accent); background: #1a3a4a; }
         .dice-btn.zero { background: #451010; border-color: #631414; }
 
-        /* Ladder Buttons */
         .ladder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .ladder-btn { border-radius: 16px; padding: 30px 10px; text-align: center; font-weight: 900; font-size: 1.2em; border: none; }
+        .ladder-btn { border-radius: 16px; padding: 35px 10px; text-align: center; font-weight: 900; font-size: 1.2em; border: none; }
         .l-win { background: var(--win); color: #000; }
         .l-fail { background: var(--error); color: #fff; }
 
-        /* TV Popups */
+        /* TV Emoji Popup */
         #tv-emoji { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 120px; z-index: 2000; pointer-events: none; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #tv-emoji.show { transform: translate(-50%, -50%) scale(1); }
 
@@ -123,6 +120,10 @@
         <button class="quick-btn" onclick="setZoom('zoom-compact')">KOMP</button>
         <button class="quick-btn" onclick="setZoom('zoom-tiny')">MINI</button>
     </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0;">
+        <span>TV-Läge</span>
+        <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
+    </div>
     <button class="btn-main" style="width:100%; background:var(--error); color:#fff;" onclick="nextRound()">AVSLUTA MATCH (TVINGA)</button>
     <button class="btn-main" style="width:100%" onclick="closeSettings()">KLAR</button>
 </div>
@@ -158,6 +159,7 @@
 
 <script>
 let players = [];
+let options = { tv: false };
 let activePIdx = null, activeCat = null, currentNumInput = "";
 let lastChangedCell = { pIdx: null, cat: null };
 let currentPlayerTurn = 0;
@@ -165,22 +167,6 @@ let currentPlayerTurn = 0;
 const upperCats = ["Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor"];
 const lowerCats = ["Ett par", "Två par", "Triss", "Fyrtal", "Liten stege", "Stor stege", "Kåk", "Chans", "Yatzy"];
 const diceIcons = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-
-window.onload = () => {
-    const savedNames = localStorage.getItem('statzy_names');
-    const savedScores = localStorage.getItem('statzy_scores');
-    if (savedNames) {
-        JSON.parse(savedNames).forEach(n => addPlayerField(n));
-        if (savedScores) {
-            players = JSON.parse(savedScores);
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            renderBoard();
-        }
-    } else {
-        addPlayerField('Spelare 1'); addPlayerField('Spelare 2');
-    }
-};
 
 function addPlayerField(name) {
     const div = document.createElement('div');
@@ -223,7 +209,6 @@ function renderBoard() {
                 let diff = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
                 return `<td style="color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">${diff}</td>`;
             }).join('')}</tr>`;
-            h += `<tr style="background:#000; border-top:1px solid #333"><td>Bonus</td>${players.map((p, i) => `<td>${calculateValues(i).bonus}</td>`).join('')}</tr>`;
         } else {
             h += `<tr style="background:#000; color:var(--accent); font-weight:900"><td>TOTALT</td>${players.map((p, i) => `<td>${calculateValues(i).total}</td>`).join('')}</tr>`;
         }
@@ -237,14 +222,12 @@ function renderBoard() {
 }
 
 function openInput(pIdx, cat) {
-    // 1. Varning om man skippar tur
+    // Varningar
     if (pIdx !== currentPlayerTurn) {
-        if (!confirm(`Det är egentligen ${players[currentPlayerTurn].name}s tur. Vill du ändra för ${players[pIdx].name} ändå?`)) return;
+        if (!confirm(`Varning: Det är ${players[currentPlayerTurn].name}s tur. Vill du ändra för ${players[pIdx].name} ändå?`)) return;
     }
-
-    // 2. Varning om överskrivning
     if (players[pIdx].scores[cat] !== undefined) {
-        if (!confirm(`Det finns redan poäng här (${players[pIdx].scores[cat]}). Vill du ändra?`)) return;
+        if (!confirm(`Varning: Poäng finns redan (${players[pIdx].scores[cat]}). Vill du ändra?`)) return;
     }
 
     activePIdx = pIdx; activeCat = cat;
@@ -307,16 +290,11 @@ function pressNum(v) {
     if (v === 'C') currentNumInput = ""; 
     else if (currentNumInput.length < 2) currentNumInput += v;
     document.getElementById('num-display').innerText = currentNumInput || "-";
-    
-    // Auto-log
-    if (currentNumInput.length === 1 && parseInt(v) >= 5) confirmNumeric();
-    else if (currentNumInput.length === 2) confirmNumeric();
 }
 
 function confirmNumeric() {
     const val = parseInt(currentNumInput);
-    if (isNaN(val)) return;
-    setScoreAndClose(val);
+    if (!isNaN(val)) setScoreAndClose(val);
 }
 
 function setScoreAndClose(score) {
@@ -326,7 +304,7 @@ function setScoreAndClose(score) {
         players[activePIdx].scores[activeCat] = score;
         lastChangedCell = { pIdx: activePIdx, cat: activeCat };
         triggerEmoji(score, activeCat);
-        // Flytta turen till nästa spelare
+        // Automatisk tur-hantering
         currentPlayerTurn = (activePIdx + 1) % players.length;
     }
     saveScores();
@@ -338,11 +316,10 @@ function triggerEmoji(score, cat) {
     const el = document.getElementById('tv-emoji');
     let emo = "👍";
     if (score === 0) emo = "💀";
-    else if (score === 50) emo = "🔥👑🔥";
+    else if (score >= 50) emo = "🔥👑🔥";
     else if (upperCats.includes(cat)) {
         const val = upperCats.indexOf(cat) + 1;
         if (score === val * 5) emo = "🤩";
-        if (score === val * 4) emo = "🔥";
     }
     el.innerText = emo;
     el.classList.add('show');
@@ -363,13 +340,11 @@ function calculateValues(pIdx) {
 }
 
 function updatePrognosis() {
-    // Simpel simulering för stapeln
-    const bar = document.getElementById('probBar');
-    bar.innerHTML = "";
-    let totals = players.map((p, i) => calculateValues(i).total + (15 - Object.keys(p.scores).length) * 10);
-    let sumTotal = totals.reduce((a, b) => a + b, 0);
+    const bar = document.getElementById('probBar'); bar.innerHTML = "";
+    let totals = players.map((p, i) => calculateValues(i).total + 20);
+    let sum = totals.reduce((a, b) => a + b, 0);
     players.forEach((p, i) => {
-        let pct = (totals[i] / sumTotal) * 100;
+        let pct = (totals[i] / sum) * 100;
         bar.innerHTML += `<div class="prob-seg" style="width:${pct}%; background:${p.color}">${Math.round(pct)}%</div>`;
     });
 }
@@ -379,14 +354,13 @@ function checkGameOver() {
     document.getElementById('mainFooter').style.display = isDone ? 'block' : 'none';
 }
 
-function closeModal() { 
-    document.getElementById('overlayInput').style.display = 'none'; 
-    document.getElementById('modalInput').style.display = 'none'; 
-}
+function closeModal() { document.getElementById('overlayInput').style.display = 'none'; document.getElementById('modalInput').style.display = 'none'; }
 function openSettings() { document.getElementById('overlaySettings').style.display = 'block'; document.getElementById('modalSettings').style.display = 'block'; }
 function closeSettings() { document.getElementById('overlaySettings').style.display = 'none'; document.getElementById('modalSettings').style.display = 'none'; }
+function toggleOption(opt) { options[opt] = !options[opt]; if(opt === 'tv') document.body.classList.toggle('mode-tv', options.tv); updateToggles(); }
+function updateToggles() { document.getElementById('toggleTV').className = 'switch ' + (options.tv ? 'on' : ''); }
 function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(players)); }
-function nextRound() { if(confirm("Starta ny runda?")) { localStorage.removeItem('statzy_scores'); location.reload(); } }
+function nextRound() { if(confirm("Ny match?")) { localStorage.removeItem('statzy_scores'); location.reload(); } }
 function setZoom(z) { document.body.className = z; }
 </script>
 
