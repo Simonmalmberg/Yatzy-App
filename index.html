@@ -5,91 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Statzy - Elite Yatzy</title>
+    <title>Statzy - The Master Edition</title>
     <style>
         :root { 
             --bg: #0d0d0d; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
-            --padd: 8px; --fs-base: 14px; --sb-h: 22px; --row-h: 38px; --prob-h: 22px;
+            --padd: 8px; --fs-base: 14px; --sb-h: 22px; --row-h: 38px;
         }
 
-        body.zoom-normal { --padd: 8px; --fs-base: 14px; --sb-h: 22px; --row-h: 38px; }
-        body.zoom-compact { --padd: 4px; --fs-base: 12px; --sb-h: 20px; --row-h: 32px; }
-        body.zoom-tiny { --padd: 1px; --fs-base: 11px; --sb-h: 18px; --row-h: 28px; }
+        body.zoom-normal { --padd: 8px; --fs-base: 14px; --row-h: 38px; }
+        body.zoom-compact { --padd: 4px; --fs-base: 12px; --row-h: 32px; }
+        body.zoom-tiny { --padd: 1px; --fs-base: 10px; --row-h: 26px; }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
         #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
         input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
-        .remove-btn { background: #451010; color: #ff3b30; border: 1px solid #631414; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 11px; }
         .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; margin-top: 20px; }
 
-        /* Game UI */
         header { position: sticky; top: 0; background: var(--bg); padding: 5px; z-index: 100; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
-        .prob-bar { flex-grow: 1; display: flex; height: var(--prob-h); background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
-        .prob-seg { transition: width 0.8s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
+        .prob-bar { flex-grow: 1; display: flex; height: 18px; background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
+        .prob-seg { transition: width 0.8s ease; text-align: center; color: #000; font-size: 10px; line-height: 18px; font-weight: 900; }
         
-        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 320px; }
-        td, th { padding: var(--padd) 2px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
+        /* Table & Highlight logic */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 350px; }
+        td, th { padding: var(--padd) 2px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; transition: background 0.3s; }
         
-        /* STICKY COLUMN: Kategoritexter alltid synliga */
         td:first-child, th:first-child { 
-            position: sticky; left: 0; z-index: 10; background: var(--bg); 
-            text-align: left; width: 95px; font-weight: 700; color: #999; 
+            position: sticky; left: 0; z-index: 15; background: var(--bg); 
+            text-align: left; width: 95px; font-weight: 700; color: #777; 
             padding-left: 10px; border-right: 2px solid #222;
         }
 
-        .score-box { background: #1a1a1c; border-radius: 6px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        
-        /* Turn Indicator */
-        .active-turn-head { color: #fff !important; text-decoration: underline; text-underline-offset: 4px; animation: pulseTurn 1.5s infinite; }
-        .last-changed-box { border: 2px solid #fff !important; animation: pulseBorder 2s infinite; z-index: 5; }
-        
-        @keyframes pulseTurn { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        @keyframes pulseBorder { 50% { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); } }
+        /* Highlight hela kolumnen för aktiv spelare */
+        .active-col { background: rgba(0, 209, 255, 0.07) !important; }
+        th.active-col { color: #fff !important; text-decoration: underline; }
 
-        /* TV Mode Splits */
+        .score-box { background: rgba(255,255,255,0.05); border-radius: 6px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; }
+        .last-changed-box { border: 2px solid #fff !important; z-index: 5; box-shadow: 0 0 10px var(--accent); }
+        
+        .sum-row { background: #111; font-size: 0.85em; }
+        .bonus-row { background: #000; font-weight: 900; color: var(--win); }
+        .total-row { background: #000; color: var(--accent); font-weight: 900; border-top: 2px solid var(--accent); }
+
         body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 5px; }
 
         /* Modals */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; backdrop-filter: blur(10px); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 1000; backdrop-filter: blur(10px); }
         .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 1001; border-radius: 24px 24px 0 0; padding: 20px; box-sizing: border-box; border-top: 1px solid #444; }
         
-        .modal-cat-name { font-size: 1.4em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; }
-        .modal-player-name { font-size: 1em; color: #888; text-align: center; margin-bottom: 20px; }
+        .modal-cat-name { font-size: 1.5em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; margin-bottom: 5px; }
+        .modal-player-name { font-size: 1em; color: #888; text-align: center; margin-bottom: 25px; font-weight: bold; }
 
-        /* Input Grids */
-        .dice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .dice-btn { background: #2c2c2e; border: 2px solid #3a3a3c; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .dice-btn span { font-size: 20px; color: #fff; }
-        .dice-btn small { font-size: 14px; font-weight: 900; color: var(--accent); }
-        .dice-btn.zero { background: #451010; border-color: #631414; }
+        /* Horizontal Dice UI */
+        .horizontal-scroll { display: flex; overflow-x: auto; gap: 12px; padding: 10px 5px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; justify-content: center; }
+        .dice-card { flex: 0 0 70px; scroll-snap-align: center; background: #2c2c2e; border: 2px solid #3a3a3c; border-radius: 14px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .dice-card.zero { border-color: var(--error); background: #3d1414; }
+        .dice-icon { font-size: 28px; line-height: 1; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .dice-val { font-size: 16px; font-weight: 900; color: var(--accent); }
 
-        .ladder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .ladder-btn { border-radius: 16px; padding: 35px 10px; text-align: center; font-weight: 900; font-size: 1.2em; border: none; }
-        .l-win { background: var(--win); color: #000; }
-        .l-fail { background: var(--error); color: #fff; }
+        /* Ladder UI */
+        .ladder-wrap { display: flex; justify-content: space-between; gap: 20px; max-width: 500px; margin: 0 auto; }
+        .ladder-opt { flex: 1; border-radius: 20px; padding: 20px 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 3px solid transparent; }
+        .ladder-opt.fail { background: #3d1414; border-color: #631414; color: var(--error); }
+        .ladder-opt.success { background: #143d24; border-color: #1a6331; color: var(--win); }
+        .ladder-art { font-size: 20px; letter-spacing: 2px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px; }
 
-        /* TV Emoji Popup */
-        #tv-emoji { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 120px; z-index: 2000; pointer-events: none; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #tv-emoji.show { transform: translate(-50%, -50%) scale(1); }
+        /* TV Popups */
+        #tv-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 2000; text-align: center; pointer-events: none; transition: 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        #tv-popup.show { transform: translate(-50%, -50%) scale(1); }
+        .tv-emoji { font-size: 100px; display: block; margin-bottom: 10px; }
+        .tv-name { font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--accent); text-transform: uppercase; letter-spacing: 2px; }
 
-        .clear-btn { background: none; color: #555; border: none; margin-top: 20px; width: 100%; text-decoration: underline; font-size: 14px; }
+        .clear-btn { background: none; color: #555; border: none; margin-top: 30px; width: 100%; text-decoration: underline; font-size: 14px; font-weight: bold; }
 
-        @media (orientation: landscape) {
-            .modal { overflow-y: auto; height: 100%; border-radius: 0; padding: 10px 40px; }
-            .dice-grid { grid-template-columns: repeat(6, 1fr); }
-            .ladder-btn { padding: 15px; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="zoom-compact">
 
-<div id="tv-emoji"></div>
+<div id="tv-popup">
+    <span class="tv-emoji" id="tv-emoji">🔥</span>
+    <span class="tv-name" id="tv-name">ANNA</span>
+</div>
 
 <div id="setup">
-    <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
+    <h1 style="font-size: 5em; margin: 0; color: var(--accent); letter-spacing: -5px; font-weight: 900;">Statzy</h1>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
     <br>
@@ -98,7 +100,7 @@
 
 <div id="game" style="display:none;">
     <header>
-        <button style="background:#222; border:none; color:#aaa; padding:8px 12px; border-radius:8px;" onclick="openSettings()">⚙️</button>
+        <button style="background:#222; border:none; color:#aaa; padding:10px; border-radius:10px;" onclick="openSettings()">⚙️</button>
         <div class="prob-bar" id="probBar"></div>
     </header>
     
@@ -107,8 +109,8 @@
         <div class="table-wrap"><table id="tableLower"></table></div>
     </div>
 
-    <div class="game-footer" id="mainFooter" style="text-align:center; padding:20px; display:none;">
-        <button class="btn-main" onclick="nextRound()" style="background:var(--win)">NÄSTA RUNDA</button>
+    <div class="game-footer" id="mainFooter" style="text-align:center; padding:30px; display:none;">
+        <button class="btn-main" onclick="nextRound()" style="background:var(--win)">STARTA NY MATCH</button>
     </div>
 </div>
 
@@ -116,15 +118,15 @@
 <div class="modal" id="modalSettings">
     <h2 style="text-align:center">Inställningar</h2>
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
-        <button class="quick-btn" onclick="setZoom('zoom-normal')">STD</button>
-        <button class="quick-btn" onclick="setZoom('zoom-compact')">KOMP</button>
-        <button class="quick-btn" onclick="setZoom('zoom-tiny')">MINI</button>
+        <button class="btn-main" style="padding:15px; margin:0;" onclick="setZoom('zoom-normal')">STD</button>
+        <button class="btn-main" style="padding:15px; margin:0;" onclick="setZoom('zoom-compact')">KOMP</button>
+        <button class="btn-main" style="padding:15px; margin:0;" onclick="setZoom('zoom-tiny')">MINI</button>
     </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0;">
-        <span>TV-Läge</span>
-        <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0; padding:10px; background:#222; border-radius:10px;">
+        <span>TV-Läge (Emojis & Större vy)</span>
+        <button id="tvToggle" style="background:#333; border:none; color:white; padding:10px 20px; border-radius:8px; font-weight:bold" onclick="toggleOption('tv')">AV</button>
     </div>
-    <button class="btn-main" style="width:100%; background:var(--error); color:#fff;" onclick="nextRound()">AVSLUTA MATCH (TVINGA)</button>
+    <button class="btn-main" style="width:100%; background:var(--error); color:#fff;" onclick="nextRound()">AVBRYT & NOLLSTÄLL</button>
     <button class="btn-main" style="width:100%" onclick="closeSettings()">KLAR</button>
 </div>
 
@@ -132,29 +134,43 @@
 <div class="modal" id="modalInput">
     <div id="modalHeader"></div>
     
-    <div id="dice-input" style="display:none;">
-        <div class="dice-grid" id="diceGrid"></div>
+    <div id="dice-input-wrap" style="display:none;">
+        <div class="horizontal-scroll" id="diceGrid"></div>
     </div>
 
-    <div id="ladder-input" style="display:none;">
-        <div class="ladder-grid">
-            <button class="ladder-btn l-win" onclick="handleLadder(true)">LYCKAD ✅</button>
-            <button class="ladder-btn l-fail" onclick="handleLadder(false)">MISSAD ❌</button>
+    <div id="ladder-input-wrap" style="display:none;">
+        <div class="ladder-wrap">
+            <div class="ladder-opt fail" onclick="setScoreAndClose(0)">
+                <span style="font-size:30px">❌</span>
+                <b>MISSAD</b>
+            </div>
+            <div class="ladder-opt success" onclick="handleLadderSuccess()">
+                <div class="ladder-art" id="ladderArt">1 2 3 4 5</div>
+                <b id="ladderPoints">15p</b>
+                <span style="font-size:14px; font-weight:900">LYCKAD</span>
+            </div>
         </div>
     </div>
 
-    <div id="numeric-input" style="display:none;">
+    <div id="numeric-input-wrap" style="display:none;">
         <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:12px; margin-bottom:15px; border:1px solid #333">-</div>
-        <div class="dice-grid">
-            <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
-            <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
-            <div class="quick-btn" onclick="pressNum(7)">7</div><div class="quick-btn" onclick="pressNum(8)">8</div><div class="quick-btn" onclick="pressNum(9)">9</div>
-            <div class="quick-btn" style="background:#444" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
-            <div class="quick-btn" style="background:var(--win); color:#000" onclick="confirmNumeric()">OK</div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; max-width:320px; margin:0 auto;">
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(1)">1</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(2)">2</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(3)">3</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(4)">4</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(5)">5</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(6)">6</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(7)">7</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(8)">8</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(9)">9</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#444; color:white;" onclick="pressNum('C')">C</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(0)">0</button>
+            <button class="btn-main" style="padding:15px; margin:0; background:var(--win); color:black;" onclick="confirmNumeric()">OK</button>
         </div>
     </div>
 
-    <button class="clear-btn" onclick="setScoreAndClose(null)">Rensa ruta</button>
+    <button class="clear-btn" onclick="setScoreAndClose(null)">TÖM RUTAN</button>
 </div>
 
 <script>
@@ -172,7 +188,7 @@ function addPlayerField(name) {
     const div = document.createElement('div');
     div.className = 'player-row';
     div.innerHTML = `<input type="text" placeholder="Namn" value="${name}">
-        <button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
+        <button class="remove-btn" onclick="this.parentElement.remove()" style="border:none; background:none; color:red; font-weight:bold; padding:10px;">X</button>`;
     document.getElementById('player-list').appendChild(div);
 }
 
@@ -183,7 +199,6 @@ function startGame() {
         scores: {},
         color: ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"][idx % 6]
     }));
-    localStorage.setItem('statzy_names', JSON.stringify(players.map(p => p.name)));
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
     renderBoard();
@@ -192,25 +207,29 @@ function startGame() {
 function renderBoard() {
     const renderTable = (cats, isUpper) => {
         let h = `<thead><tr><th></th>${players.map((p, i) => 
-            `<th style="color:${p.color}" class="${currentPlayerTurn === i ? 'active-turn-head' : ''}">${p.name}</th>`).join('')}</tr></thead><tbody>`;
+            `<th style="color:${p.color}" class="${currentPlayerTurn === i ? 'active-col' : ''}">${p.name}</th>`).join('')}</tr></thead><tbody>`;
         
         cats.forEach(cat => {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
                 let val = p.scores[cat];
                 let display = val === undefined ? "" : (val === 0 ? "/" : val);
                 let isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
-                return `<td><div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${display}</div></td>`;
+                return `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">
+                    <div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${display}</div>
+                </td>`;
             }).join('')}</tr>`;
         });
 
         if(isUpper) {
-            h += `<tr style="background:#111"><td>± Par</td>${players.map((p, i) => {
+            h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">${calculateValues(i).sum}</td>`).join('')}</tr>`;
+            h += `<tr class="sum-row"><td>± Par</td>${players.map((p, i) => {
                 const v = calculateValues(i);
                 let diff = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
-                return `<td style="color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">${diff}</td>`;
+                return `<td class="${currentPlayerTurn === i ? 'active-col' : ''}" style="color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">${diff}</td>`;
             }).join('')}</tr>`;
+            h += `<tr class="bonus-row"><td>Bonus</td>${players.map((p, i) => `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">${calculateValues(i).bonus}</td>`).join('')}</tr>`;
         } else {
-            h += `<tr style="background:#000; color:var(--accent); font-weight:900"><td>TOTALT</td>${players.map((p, i) => `<td>${calculateValues(i).total}</td>`).join('')}</tr>`;
+            h += `<tr class="total-row"><td>TOTALT</td>${players.map((p, i) => `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">${calculateValues(i).total}</td>`).join('')}</tr>`;
         }
         return h + "</tbody>";
     };
@@ -222,13 +241,8 @@ function renderBoard() {
 }
 
 function openInput(pIdx, cat) {
-    // Varningar
-    if (pIdx !== currentPlayerTurn) {
-        if (!confirm(`Varning: Det är ${players[currentPlayerTurn].name}s tur. Vill du ändra för ${players[pIdx].name} ändå?`)) return;
-    }
-    if (players[pIdx].scores[cat] !== undefined) {
-        if (!confirm(`Varning: Poäng finns redan (${players[pIdx].scores[cat]}). Vill du ändra?`)) return;
-    }
+    if (pIdx !== currentPlayerTurn && !confirm(`Varning: Det är ${players[currentPlayerTurn].name}s tur. Fortsätt ändå?`)) return;
+    if (players[pIdx].scores[cat] !== undefined && !confirm(`Det finns redan poäng här. Vill du skriva över?`)) return;
 
     activePIdx = pIdx; activeCat = cat;
     document.getElementById('modalHeader').innerHTML = `<div class="modal-cat-name">${cat}</div><div class="modal-player-name">${players[pIdx].name}</div>`;
@@ -236,60 +250,69 @@ function openInput(pIdx, cat) {
     document.getElementById('overlayInput').style.display = 'block';
     document.getElementById('modalInput').style.display = 'block';
 
-    const diceInp = document.getElementById('dice-input');
-    const laddInp = document.getElementById('ladder-input');
-    const numInp = document.getElementById('numeric-input');
+    const diceWrap = document.getElementById('dice-input-wrap');
+    const ladderWrap = document.getElementById('ladder-input-wrap');
+    const numWrap = document.getElementById('numeric-input-wrap');
     
-    diceInp.style.display = 'none'; laddInp.style.display = 'none'; numInp.style.display = 'none';
+    diceWrap.style.display = 'none'; ladderWrap.style.display = 'none'; numWrap.style.display = 'none';
 
     if (upperCats.includes(cat)) {
-        diceInp.style.display = 'block';
-        renderDiceGrid(upperCats.indexOf(cat) + 1, 5);
+        diceWrap.style.display = 'block';
+        renderDiceHorizontal(upperCats.indexOf(cat) + 1, 5);
     } else if (["Ett par", "Triss", "Fyrtal"].includes(cat)) {
-        diceInp.style.display = 'block';
-        renderSpecialDice(cat);
+        diceWrap.style.display = 'block';
+        renderSpecialDiceHorizontal(cat);
     } else if (cat.includes("stege") || cat === "Yatzy") {
-        laddInp.style.display = 'block';
+        ladderWrap.style.display = 'block';
+        document.getElementById('ladderArt').innerText = cat === "Liten stege" ? "1 2 3 4 5" : (cat === "Stor stege" ? "2 3 4 5 6" : "⚄ ⚄ ⚄ ⚄ ⚄");
+        document.getElementById('ladderPoints').innerText = cat === "Liten stege" ? "15p" : (cat === "Stor stege" ? "20p" : "50p");
     } else {
-        numInp.style.display = 'block';
+        numWrap.style.display = 'block';
         currentNumInput = "";
         document.getElementById('num-display').innerText = "-";
     }
 }
 
-function renderDiceGrid(dieVal, max) {
+function renderDiceHorizontal(dieVal, max) {
     const grid = document.getElementById('diceGrid');
-    grid.innerHTML = `<div class="dice-btn zero" onclick="setScoreAndClose(0)"><span>❌</span><small>0</small></div>`;
+    let h = `<div class="dice-card zero" onclick="setScoreAndClose(0)"><span class="dice-icon">❌</span><b class="dice-val">0</b></div>`;
     for (let i = 1; i <= max; i++) {
-        let diceStr = ""; for(let d=0; d<i; d++) diceStr += diceIcons[dieVal];
-        grid.innerHTML += `<div class="dice-btn" onclick="setScoreAndClose(${i * dieVal})"><span>${diceStr}</span><small>${i * dieVal}</small></div>`;
+        h += `<div class="dice-card" onclick="setScoreAndClose(${i * dieVal})">
+            <span class="dice-icon">${diceIcons[dieVal].repeat(i < 4 ? i : 3)}${i > 3 ? '<br>'+diceIcons[dieVal].repeat(i-3) : ''}</span>
+            <b class="dice-val">${i * dieVal}</b>
+        </div>`;
     }
+    grid.innerHTML = h;
 }
 
-function renderSpecialDice(cat) {
+function renderSpecialDiceHorizontal(cat) {
     const grid = document.getElementById('diceGrid');
-    grid.innerHTML = `<div class="dice-btn zero" onclick="setScoreAndClose(0)"><span>❌</span><small>0</small></div>`;
+    let h = `<div class="dice-card zero" onclick="setScoreAndClose(0)"><span class="dice-icon">❌</span><b class="dice-val">0</b></div>`;
     let count = cat === "Ett par" ? 2 : (cat === "Triss" ? 3 : 4);
     for (let v = 1; v <= 6; v++) {
-        let diceStr = ""; for(let d=0; d<count; d++) diceStr += diceIcons[v];
-        grid.innerHTML += `<div class="dice-btn" onclick="setScoreAndClose(${v * count})"><span>${diceStr}</span><small>${v * count}</small></div>`;
+        h += `<div class="dice-card" onclick="setScoreAndClose(${v * count})">
+            <span class="dice-icon">${diceIcons[v].repeat(count)}</span>
+            <b class="dice-val">${v * count}</b>
+        </div>`;
     }
+    grid.innerHTML = h;
 }
 
-function handleLadder(success) {
-    let score = 0;
-    if (success) {
-        if (activeCat === "Liten stege") score = 15;
-        else if (activeCat === "Stor stege") score = 20;
-        else if (activeCat === "Yatzy") score = 50;
-    }
-    setScoreAndClose(score);
+function handleLadderSuccess() {
+    let s = 0;
+    if (activeCat === "Liten stege") s = 15;
+    else if (activeCat === "Stor stege") s = 20;
+    else if (activeCat === "Yatzy") s = 50;
+    setScoreAndClose(s);
 }
 
 function pressNum(v) {
     if (v === 'C') currentNumInput = ""; 
     else if (currentNumInput.length < 2) currentNumInput += v;
     document.getElementById('num-display').innerText = currentNumInput || "-";
+    
+    if (currentNumInput.length === 1 && parseInt(v) >= 5) confirmNumeric();
+    else if (currentNumInput.length === 2) confirmNumeric();
 }
 
 function confirmNumeric() {
@@ -303,27 +326,28 @@ function setScoreAndClose(score) {
     } else {
         players[activePIdx].scores[activeCat] = score;
         lastChangedCell = { pIdx: activePIdx, cat: activeCat };
-        triggerEmoji(score, activeCat);
-        // Automatisk tur-hantering
+        if(options.tv) triggerTvPopup(score, players[activePIdx].name);
         currentPlayerTurn = (activePIdx + 1) % players.length;
     }
-    saveScores();
+    localStorage.setItem('statzy_scores', JSON.stringify(players));
     closeModal();
     renderBoard();
 }
 
-function triggerEmoji(score, cat) {
-    const el = document.getElementById('tv-emoji');
+function triggerTvPopup(score, name) {
+    const el = document.getElementById('tv-popup');
+    const em = document.getElementById('tv-emoji');
+    const nm = document.getElementById('tv-name');
+    
     let emo = "👍";
     if (score === 0) emo = "💀";
-    else if (score >= 50) emo = "🔥👑🔥";
-    else if (upperCats.includes(cat)) {
-        const val = upperCats.indexOf(cat) + 1;
-        if (score === val * 5) emo = "🤩";
-    }
-    el.innerText = emo;
+    else if (score >= 50) emo = "👑";
+    else if (score >= 20) emo = "🔥";
+    
+    em.innerText = emo;
+    nm.innerText = name;
     el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 1500);
+    setTimeout(() => el.classList.remove('show'), 1800);
 }
 
 function calculateValues(pIdx) {
@@ -341,27 +365,31 @@ function calculateValues(pIdx) {
 
 function updatePrognosis() {
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
-    let totals = players.map((p, i) => calculateValues(i).total + 20);
-    let sum = totals.reduce((a, b) => a + b, 0);
+    let totals = players.map((p, i) => calculateValues(i).total + 10);
+    let sumTotal = totals.reduce((a, b) => a + b, 0);
     players.forEach((p, i) => {
-        let pct = (totals[i] / sum) * 100;
+        let pct = (totals[i] / sumTotal) * 100;
         bar.innerHTML += `<div class="prob-seg" style="width:${pct}%; background:${p.color}">${Math.round(pct)}%</div>`;
     });
 }
+
+function closeModal() { document.getElementById('overlayInput').style.display = 'none'; document.getElementById('modalInput').style.display = 'none'; }
+function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
+function closeSettings() { document.getElementById('modalSettings').style.display = 'none'; document.getElementById('overlaySettings').style.display = 'none'; }
+function toggleOption(opt) { 
+    options[opt] = !options[opt]; 
+    document.getElementById('tvToggle').innerText = options.tv ? "PÅ" : "AV";
+    document.getElementById('tvToggle').style.background = options.tv ? "var(--win)" : "#333";
+    document.body.classList.toggle('mode-tv', options.tv);
+    renderBoard();
+}
+function setZoom(z) { document.body.className = z; }
+function nextRound() { if(confirm("Nollställa och börja om?")) { localStorage.removeItem('statzy_scores'); location.reload(); } }
 
 function checkGameOver() {
     const isDone = players.every(p => Object.keys(p.scores).length === 15);
     document.getElementById('mainFooter').style.display = isDone ? 'block' : 'none';
 }
-
-function closeModal() { document.getElementById('overlayInput').style.display = 'none'; document.getElementById('modalInput').style.display = 'none'; }
-function openSettings() { document.getElementById('overlaySettings').style.display = 'block'; document.getElementById('modalSettings').style.display = 'block'; }
-function closeSettings() { document.getElementById('overlaySettings').style.display = 'none'; document.getElementById('modalSettings').style.display = 'none'; }
-function toggleOption(opt) { options[opt] = !options[opt]; if(opt === 'tv') document.body.classList.toggle('mode-tv', options.tv); updateToggles(); }
-function updateToggles() { document.getElementById('toggleTV').className = 'switch ' + (options.tv ? 'on' : ''); }
-function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(players)); }
-function nextRound() { if(confirm("Ny match?")) { localStorage.removeItem('statzy_scores'); location.reload(); } }
-function setZoom(z) { document.body.className = z; }
 </script>
 
 </body>
