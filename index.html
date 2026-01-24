@@ -52,7 +52,6 @@
         .quick-btn { background: #2c2c2e; padding: 12px; border-radius: 10px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
         .quick-btn.active-zoom { border-color: var(--accent); }
         .already-selected { background: var(--accent) !important; color: #000 !important; }
-        .btn-dead { opacity: 0.1; pointer-events: none; }
 
         #num-display { background: #000; color: var(--accent); font-size: 32px; text-align: center; padding: 5px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; min-height: 40px; max-width: 400px; margin-left: auto; margin-right: auto; }
         
@@ -141,7 +140,7 @@
         <div id="num-display">-</div>
         <div class="num-grid quick-grid">
             <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
-            <div class="quick-btn btn-dead">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
+            <div class="quick-btn" onclick="pressNum(4)">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
             <div class="quick-btn" onclick="pressNum(7)">7</div><div class="quick-btn" onclick="pressNum(8)">8</div><div class="quick-btn" onclick="pressNum(9)">9</div>
             <div class="quick-btn" style="background:#444" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
             <div class="quick-btn" style="background:var(--win); color:black" onclick="confirmNumeric()">OK</div>
@@ -316,7 +315,6 @@ function openInput(pIdx, cat) {
     if (!isNumeric) {
         const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
         let opts = [0];
-        // Ändrat: j går nu endast till 5 enligt Yatzy-regler
         if (upperCats.includes(cat)) { const v = upperCats.indexOf(cat)+1; for(let j=1; j<=5; j++) opts.push(v*j); }
         else if (cat === "Ett par") [2,4,6,8,10,12].forEach(v => opts.push(v));
         else if (cat === "Triss") [3,6,9,12,15,18].forEach(v => opts.push(v));
@@ -334,7 +332,7 @@ function pressNum(v) {
     document.getElementById('num-display').innerText = currentNumInput || "-";
     const firstDigit = parseInt(currentNumInput[0]);
     if (currentNumInput.length === 1 && firstDigit >= 5) confirmNumeric();
-    else if (currentNumInput.length === 2 && [0,1,2,3].includes(firstDigit)) confirmNumeric();
+    else if (currentNumInput.length === 2 && [0,1,2,3,4].includes(firstDigit)) confirmNumeric();
 }
 
 function confirmNumeric() {
