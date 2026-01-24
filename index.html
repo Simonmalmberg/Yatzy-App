@@ -5,349 +5,305 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Statzy - The Master Edition</title>
+    <title>Statzy - Strategic AI</title>
     <style>
         :root { 
             --bg: #0d0d0d; --card: #1c1c1e; --accent: #00d1ff; --text: #f2f2f7; --win: #34c759; --error: #ff3b30;
-            --padd: 8px; --fs-base: 14px; --sb-h: 22px; --row-h: 38px;
+            --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px;
         }
 
-        body.zoom-normal { --padd: 8px; --fs-base: 14px; --row-h: 38px; }
-        body.zoom-compact { --padd: 4px; --fs-base: 12px; --row-h: 32px; }
-        body.zoom-tiny { --padd: 1px; --fs-base: 10px; --row-h: 26px; }
+        body.zoom-normal { --padd: 8px; --fs-base: 14px; --sb-h: 20px; --row-h: 34px; --prob-h: 22px; }
+        body.zoom-compact { --padd: 2px; --fs-base: 12px; --sb-h: 18px; --row-h: 24px; --prob-h: 18px; }
+        body.zoom-tiny { --padd: 0px; --fs-base: 10px; --sb-h: 14px; --row-h: 18px; --prob-h: 14px; }
         
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: env(safe-area-inset-top) 2px 2px 2px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; font-size: var(--fs-base); }
         
         #setup { text-align: center; padding-top: 30px; animation: fadeIn 0.4s; }
         .player-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0; }
-        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 60%; font-size: 16px; outline: none; }
-        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; margin-top: 20px; }
+        input[type="text"] { background: #1c1c1e; border: 2px solid #333; color: white; padding: 12px; border-radius: 10px; width: 65%; font-size: 16px; outline: none; }
+        .remove-btn { background: #451010; color: #ff3b30; border: 1px solid #631414; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 11px; }
+        .btn-main { background: var(--accent); border: none; padding: 18px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; color: #000; width: 85%; max-width: 320px; font-size: 1.1em; }
 
-        header { position: sticky; top: 0; background: var(--bg); padding: 5px; z-index: 100; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
-        .prob-bar { flex-grow: 1; display: flex; height: 18px; background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
-        .prob-seg { transition: width 0.8s ease; text-align: center; color: #000; font-size: 10px; line-height: 18px; font-weight: 900; }
-        
-        /* Table & Highlight logic */
-        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 350px; }
-        td, th { padding: var(--padd) 2px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; transition: background 0.3s; }
-        
+        header { position: sticky; top: 0; background: var(--bg); padding: 4px 5px; z-index: 100; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
+        .prob-bar { flex-grow: 1; display: flex; height: var(--prob-h); background: #111; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
+        .prob-seg { transition: width 0.7s cubic-bezier(0.2, 1, 0.3, 1); text-align: center; color: #000; font-size: 11px; line-height: var(--prob-h); font-weight: 900; }
+        .settings-trigger { background: #222; border: none; color: #aaa; padding: 5px 8px; border-radius: 6px; font-size: 16px; }
+
+        /* NYHET: Container för sidscrollning */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 300px; }
+        td { padding: var(--padd) 1px; border-bottom: 1px solid #222; text-align: center; height: var(--row-h); position: relative; }
+
+        /* NYHET: Sticky första kolumn */
         td:first-child, th:first-child { 
-            position: sticky; left: 0; z-index: 15; background: var(--bg); 
-            text-align: left; width: 95px; font-weight: 700; color: #777; 
-            padding-left: 10px; border-right: 2px solid #222;
+            position: sticky; 
+            left: 0; 
+            z-index: 10; 
+            background: var(--bg); 
+            text-align: left; 
+            width: 90px !important; /* Fast bredd för labels */
+            font-weight: 700; 
+            color: #999; 
+            padding-left: 10px; 
+            border-right: 2px solid #222; 
+        }
+        body.mode-tv td:first-child { padding-left: calc(env(safe-area-inset-left) + 20px); }
+
+        .score-box { background: #1a1a1c; border-radius: 4px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); font-size: calc(var(--fs-base) + 1px); line-height: var(--sb-h); display: flex; align-items: center; justify-content: center; }
+        .last-changed-box { border: 2px solid #fff !important; box-shadow: 0 0 10px rgba(255,255,255,0.4); z-index: 2; animation: pulseBorder 2s infinite; }
+        @keyframes pulseBorder { 50% { border-color: rgba(255,255,255,1); box-shadow: 0 0 15px rgba(255,255,255,0.6); } }
+
+        .sum-row { background: #111; color: #fff; font-size: 0.85em; }
+        .total-row { background: #000; border-top: 2px solid var(--accent); color: var(--accent); font-weight: 900; }
+
+        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.94); z-index: 110; backdrop-filter: blur(8px); }
+        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 120; border-radius: 20px 20px 0 0; padding: 15px; box-sizing: border-box; border-top: 1px solid #333; }
+        .modal-cat-name { font-size: 1.2em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; }
+        .modal-player-name { font-size: 0.9em; color: #888; text-align: center; margin-bottom: 10px; }
+
+        .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 400px; margin: 0 auto; }
+        .quick-btn { background: #2c2c2e; padding: 12px; border-radius: 10px; text-align: center; font-weight: 800; font-size: 18px; color: white; border: 1px solid #3a3a3c; }
+        .quick-btn.active-zoom { border-color: var(--accent); }
+        .already-selected { background: var(--accent) !important; color: #000 !important; }
+        .btn-dead { opacity: 0.1; pointer-events: none; }
+
+        #num-display { background: #000; color: var(--accent); font-size: 32px; text-align: center; padding: 5px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; min-height: 40px; max-width: 400px; margin-left: auto; margin-right: auto; }
+        
+        .clear-btn { background: none; color: #666; border: none; margin-top: 15px; width: 100%; text-decoration: underline; font-weight: bold; font-size: 14px; padding: 10px; }
+
+        @media (orientation: landscape) {
+            .num-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 280px; }
+            .modal { padding: 8px 15px; overflow-y: auto; height: 100%; max-height: 100vh; border-radius: 0; }
+            .clear-btn { margin-top: 5px; padding: 5px; }
+            #num-display { max-width: 280px; font-size: 24px; padding: 2px; margin-bottom: 5px; }
         }
 
-        /* Highlight hela kolumnen för aktiv spelare */
-        .active-col { background: rgba(0, 209, 255, 0.07) !important; }
-        th.active-col { color: #fff !important; text-decoration: underline; }
-
-        .score-box { background: rgba(255,255,255,0.05); border-radius: 6px; min-height: var(--sb-h); border: 1px solid #333; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; }
-        .last-changed-box { border: 2px solid #fff !important; z-index: 5; box-shadow: 0 0 10px var(--accent); }
+        .settings-section { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .settings-label { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; font-weight: bold; }
+        .switch { width: 44px; height: 24px; background: #333; border-radius: 12px; position: relative; cursor: pointer; }
+        .switch.on { background: var(--win); }
+        .switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
+        .switch.on::after { left: 22px; }
         
-        .sum-row { background: #111; font-size: 0.85em; }
-        .bonus-row { background: #000; font-weight: 900; color: var(--win); }
-        .total-row { background: #000; color: var(--accent); font-weight: 900; border-top: 2px solid var(--accent); }
-
-        body.mode-tv #score-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 5px; }
-
-        /* Modals */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 1000; backdrop-filter: blur(10px); }
-        .modal { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #1c1c1e; z-index: 1001; border-radius: 24px 24px 0 0; padding: 20px; box-sizing: border-box; border-top: 1px solid #444; }
-        
-        .modal-cat-name { font-size: 1.5em; font-weight: 900; color: var(--accent); text-transform: uppercase; text-align: center; margin-bottom: 5px; }
-        .modal-player-name { font-size: 1em; color: #888; text-align: center; margin-bottom: 25px; font-weight: bold; }
-
-        /* Horizontal Dice UI */
-        .horizontal-scroll { display: flex; overflow-x: auto; gap: 12px; padding: 10px 5px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; justify-content: center; }
-        .dice-card { flex: 0 0 70px; scroll-snap-align: center; background: #2c2c2e; border: 2px solid #3a3a3c; border-radius: 14px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .dice-card.zero { border-color: var(--error); background: #3d1414; }
-        .dice-icon { font-size: 28px; line-height: 1; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
-        .dice-val { font-size: 16px; font-weight: 900; color: var(--accent); }
-
-        /* Ladder UI */
-        .ladder-wrap { display: flex; justify-content: space-between; gap: 20px; max-width: 500px; margin: 0 auto; }
-        .ladder-opt { flex: 1; border-radius: 20px; padding: 20px 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 3px solid transparent; }
-        .ladder-opt.fail { background: #3d1414; border-color: #631414; color: var(--error); }
-        .ladder-opt.success { background: #143d24; border-color: #1a6331; color: var(--win); }
-        .ladder-art { font-size: 20px; letter-spacing: 2px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px; }
-
-        /* TV Popups */
-        #tv-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); z-index: 2000; text-align: center; pointer-events: none; transition: 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        #tv-popup.show { transform: translate(-50%, -50%) scale(1); }
-        .tv-emoji { font-size: 100px; display: block; margin-bottom: 10px; }
-        .tv-name { font-size: 40px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--accent); text-transform: uppercase; letter-spacing: 2px; }
-
-        .clear-btn { background: none; color: #555; border: none; margin-top: 30px; width: 100%; text-decoration: underline; font-size: 14px; font-weight: bold; }
-
+        .game-footer { padding: 15px; text-align: center; display: none; }
+        .btn-round { background: var(--accent); border: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; color: #000; font-size: 1.1em; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="zoom-compact">
 
-<div id="tv-popup">
-    <span class="tv-emoji" id="tv-emoji">🔥</span>
-    <span class="tv-name" id="tv-name">ANNA</span>
-</div>
-
 <div id="setup">
-    <h1 style="font-size: 5em; margin: 0; color: var(--accent); letter-spacing: -5px; font-weight: 900;">Statzy</h1>
+    <h1 style="font-size: 4em; margin: 0; color: var(--accent); letter-spacing: -3px; font-weight: 900;">Statzy</h1>
     <div id="player-list"></div>
     <button style="background:none; border:1px solid #333; color:#777; padding:10px; border-radius:10px; font-size:12px; margin-top:15px" onclick="addPlayerField('')">+ LÄGG TILL SPELARE</button>
-    <br>
+    <br><br>
     <button class="btn-main" onclick="startGame()">STARTA MATCH</button>
 </div>
 
 <div id="game" style="display:none;">
     <header>
-        <button style="background:#222; border:none; color:#aaa; padding:10px; border-radius:10px;" onclick="openSettings()">⚙️</button>
+        <button class="settings-trigger" onclick="openSettings()">⚙️</button>
         <div class="prob-bar" id="probBar"></div>
     </header>
-    
     <div id="score-container">
         <div class="table-wrap"><table id="tableUpper"></table></div>
         <div class="table-wrap"><table id="tableLower"></table></div>
     </div>
-
-    <div class="game-footer" id="mainFooter" style="text-align:center; padding:30px; display:none;">
-        <button class="btn-main" onclick="nextRound()" style="background:var(--win)">STARTA NY MATCH</button>
+    <div class="game-footer" id="mainFooter">
+        <button class="btn-round" onclick="nextRound()">NÄSTA RUNDA</button>
     </div>
 </div>
 
 <div class="overlay" id="overlaySettings" onclick="closeSettings()"></div>
 <div class="modal" id="modalSettings">
-    <h2 style="text-align:center">Inställningar</h2>
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
-        <button class="btn-main" style="padding:15px; margin:0;" onclick="setZoom('zoom-normal')">STD</button>
-        <button class="btn-main" style="padding:15px; margin:0;" onclick="setZoom('zoom-compact')">KOMP</button>
-        <button class="btn-main" style="padding:15px; margin:0;" onclick="setZoom('zoom-tiny')">MINI</button>
+    <div class="settings-section">
+        <span class="settings-label">Zoom & Vy</span>
+        <div class="quick-grid">
+            <button class="quick-btn zoom-opt" id="opt-zoom-normal" onclick="setZoom('zoom-normal')">STD</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-compact" onclick="setZoom('zoom-compact')">KOMP</button>
+            <button class="quick-btn zoom-opt" id="opt-zoom-tiny" onclick="setZoom('zoom-tiny')">MINI</button>
+        </div>
     </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0; padding:10px; background:#222; border-radius:10px;">
-        <span>TV-Läge (Emojis & Större vy)</span>
-        <button id="tvToggle" style="background:#333; border:none; color:white; padding:10px 20px; border-radius:8px; font-weight:bold" onclick="toggleOption('tv')">AV</button>
+    <div class="settings-section">
+        <span class="settings-label">Inställningar</span>
+        <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
+            <span>Strategiska Tips</span>
+            <div class="switch" id="toggleCritical" onclick="toggleOption('critical')"></div>
+        </div>
+        <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
+            <span>TV-Läge</span>
+            <div class="switch" id="toggleTV" onclick="toggleOption('tv')"></div>
+        </div>
+        <div id="wakeIndicator" style="font-size:10px; color:var(--win); font-weight:bold;">Skärmlås: AKTIVT 🟢</div>
     </div>
-    <button class="btn-main" style="width:100%; background:var(--error); color:#fff;" onclick="nextRound()">AVBRYT & NOLLSTÄLL</button>
-    <button class="btn-main" style="width:100%" onclick="closeSettings()">KLAR</button>
+    <div class="settings-section" style="border:none">
+        <button class="quick-btn" style="width:100%; background:#2a1515; color:#ff6b6b; border:1px solid #451010; font-size:14px" onclick="nextRound()">NÄSTA RUNDA (TVINGA)</button>
+    </div>
+    <button class="btn-main" onclick="closeSettings()">KLAR</button>
 </div>
 
 <div class="overlay" id="overlayInput" onclick="closeModal()"></div>
 <div class="modal" id="modalInput">
-    <div id="modalHeader"></div>
-    
-    <div id="dice-input-wrap" style="display:none;">
-        <div class="horizontal-scroll" id="diceGrid"></div>
+    <div id="modalInputTitle"></div>
+    <div id="quick-pick-section">
+        <div class="quick-grid" id="quickGrid"></div>
+        <button class="clear-btn" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
-
-    <div id="ladder-input-wrap" style="display:none;">
-        <div class="ladder-wrap">
-            <div class="ladder-opt fail" onclick="setScoreAndClose(0)">
-                <span style="font-size:30px">❌</span>
-                <b>MISSAD</b>
-            </div>
-            <div class="ladder-opt success" onclick="handleLadderSuccess()">
-                <div class="ladder-art" id="ladderArt">1 2 3 4 5</div>
-                <b id="ladderPoints">15p</b>
-                <span style="font-size:14px; font-weight:900">LYCKAD</span>
-            </div>
+    <div id="numeric-section" style="display:none;">
+        <div id="err-msg" style="color:red; text-align:center; font-size:12px; min-height:15px"></div>
+        <div id="num-display">-</div>
+        <div class="num-grid quick-grid">
+            <div class="quick-btn" onclick="pressNum(1)">1</div><div class="quick-btn" onclick="pressNum(2)">2</div><div class="quick-btn" onclick="pressNum(3)">3</div>
+            <div class="quick-btn btn-dead">4</div><div class="quick-btn" onclick="pressNum(5)">5</div><div class="quick-btn" onclick="pressNum(6)">6</div>
+            <div class="quick-btn" onclick="pressNum(7)">7</div><div class="quick-btn" onclick="pressNum(8)">8</div><div class="quick-btn" onclick="pressNum(9)">9</div>
+            <div class="quick-btn" style="background:#444" onclick="pressNum('C')">C</div><div class="quick-btn" onclick="pressNum(0)">0</div>
+            <div class="quick-btn" style="background:var(--win); color:black" onclick="confirmNumeric()">OK</div>
         </div>
+        <button class="clear-btn" onclick="setScoreAndClose(null)">Rensa ruta</button>
     </div>
-
-    <div id="numeric-input-wrap" style="display:none;">
-        <div id="num-display" style="background:#000; color:var(--accent); font-size:40px; text-align:center; padding:10px; border-radius:12px; margin-bottom:15px; border:1px solid #333">-</div>
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; max-width:320px; margin:0 auto;">
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(1)">1</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(2)">2</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(3)">3</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(4)">4</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(5)">5</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(6)">6</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(7)">7</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(8)">8</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(9)">9</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#444; color:white;" onclick="pressNum('C')">C</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:#2c2c2e; color:white;" onclick="pressNum(0)">0</button>
-            <button class="btn-main" style="padding:15px; margin:0; background:var(--win); color:black;" onclick="confirmNumeric()">OK</button>
-        </div>
-    </div>
-
-    <button class="clear-btn" onclick="setScoreAndClose(null)">TÖM RUTAN</button>
 </div>
 
 <script>
 let players = [];
-let options = { tv: false };
+let options = { critical: false, tv: false };
 let activePIdx = null, activeCat = null, currentNumInput = "";
 let lastChangedCell = { pIdx: null, cat: null };
-let currentPlayerTurn = 0;
+let wakeLock = null;
 
 const upperCats = ["Ettor", "Tvåor", "Treor", "Fyror", "Femmor", "Sexor"];
 const lowerCats = ["Ett par", "Två par", "Triss", "Fyrtal", "Liten stege", "Stor stege", "Kåk", "Chans", "Yatzy"];
-const diceIcons = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+const colors = ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"];
+
+window.onload = () => {
+    const savedNames = localStorage.getItem('statzy_names');
+    const savedScores = localStorage.getItem('statzy_scores');
+    const savedZoom = localStorage.getItem('statzy_zoom') || 'zoom-compact';
+    setZoom(savedZoom);
+    if (savedNames) {
+        JSON.parse(savedNames).forEach(n => addPlayerField(n));
+        if (savedScores) {
+            players = JSON.parse(savedScores);
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            renderBoard();
+        }
+    } else { addPlayerField('Spelare 1'); addPlayerField('Spelare 2'); }
+    updateToggles();
+};
+
+async function requestWakeLock() {
+    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+}
+
+function setZoom(mode) {
+    document.body.classList.remove('zoom-normal', 'zoom-compact', 'zoom-tiny');
+    document.body.classList.add(mode);
+    localStorage.setItem('statzy_zoom', mode);
+    document.querySelectorAll('.zoom-opt').forEach(btn => btn.classList.remove('active-zoom'));
+    const activeBtn = document.getElementById('opt-' + mode);
+    if(activeBtn) activeBtn.classList.add('active-zoom');
+    if(players.length > 0) renderBoard();
+}
+
+function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
+function closeSettings() { document.getElementById('modalSettings').style.display = 'none'; document.getElementById('overlaySettings').style.display = 'none'; }
+
+function toggleOption(opt) {
+    options[opt] = !options[opt];
+    if(opt === 'tv') document.body.classList.toggle('mode-tv', options.tv);
+    updateToggles();
+    renderBoard();
+}
+
+function updateToggles() {
+    document.getElementById('toggleCritical').className = 'switch ' + (options.critical ? 'on' : '');
+    document.getElementById('toggleTV').className = 'switch ' + (options.tv ? 'on' : '');
+}
 
 function addPlayerField(name) {
     const div = document.createElement('div');
     div.className = 'player-row';
-    div.innerHTML = `<input type="text" placeholder="Namn" value="${name}">
-        <button class="remove-btn" onclick="this.parentElement.remove()" style="border:none; background:none; color:red; font-weight:bold; padding:10px;">X</button>`;
+    const isDefault = name.startsWith('Spelare ');
+    div.innerHTML = `<input type="text" placeholder="${isDefault ? name : 'Namn'}" value="${isDefault ? '' : name}">
+        <button class="remove-btn" onclick="this.parentElement.remove()">X</button>`;
     document.getElementById('player-list').appendChild(div);
 }
 
 function startGame() {
     const inputs = document.querySelectorAll('#player-list input');
-    players = Array.from(inputs).map((i, idx) => ({
-        name: i.value || `S${idx+1}`,
-        scores: {},
-        color: ["#34c759", "#00d1ff", "#ffcc00", "#ff3b30", "#af52de", "#ff9500"][idx % 6]
-    }));
+    let rawNames = Array.from(inputs).map((i, idx) => i.value || i.placeholder || `Spelare ${idx+1}`);
+    let nameCounts = {};
+    let uniqueNames = rawNames.map(name => {
+        nameCounts[name] = (nameCounts[name] || 0) + 1;
+        if (rawNames.filter(n => n === name).length > 1) return `${name} ${nameCounts[name]}`;
+        return name;
+    });
+    players = uniqueNames.map((name, i) => ({ name: name, scores: {}, color: colors[i % colors.length] }));
+    localStorage.setItem('statzy_names', JSON.stringify(uniqueNames));
+    saveScores();
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
+    requestWakeLock();
     renderBoard();
+}
+
+function nextRound() {
+    if(confirm("Starta nästa runda?")) {
+        players.forEach(p => p.scores = {});
+        lastChangedCell = { pIdx: null, cat: null };
+        localStorage.removeItem('statzy_scores');
+        closeSettings();
+        document.getElementById('game').style.display = 'none';
+        document.getElementById('setup').style.display = 'block';
+        const list = document.getElementById('player-list');
+        list.innerHTML = "";
+        players.forEach(p => addPlayerField(p.name));
+    }
+}
+
+function saveScores() { localStorage.setItem('statzy_scores', JSON.stringify(players)); }
+
+function getTableDisplayName(name) {
+    const zoom = document.body.className;
+    // Tillåt längre namn om inte zoom-tiny
+    if (zoom === 'zoom-tiny') return name.substring(0, 2).toUpperCase();
+    return name.substring(0, 8); 
 }
 
 function renderBoard() {
     const renderTable = (cats, isUpper) => {
-        let h = `<thead><tr><th></th>${players.map((p, i) => 
-            `<th style="color:${p.color}" class="${currentPlayerTurn === i ? 'active-col' : ''}">${p.name}</th>`).join('')}</tr></thead><tbody>`;
-        
+        let h = `<thead><tr><th></th>${players.map(p => `<th style="color:${p.color}">${getTableDisplayName(p.name)}</th>`).join('')}</tr></thead><tbody>`;
         cats.forEach(cat => {
             h += `<tr><td>${cat}</td>${players.map((p, i) => {
-                let val = p.scores[cat];
-                let display = val === undefined ? "" : (val === 0 ? "/" : val);
-                let isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
-                return `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">
-                    <div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${display}</div>
-                </td>`;
+                let d = p.scores[cat] === undefined ? "" : (p.scores[cat] === 0 ? "/" : p.scores[cat]);
+                const isLast = lastChangedCell.pIdx === i && lastChangedCell.cat === cat;
+                return `<td><div class="score-box ${isLast ? 'last-changed-box' : ''}" onclick="openInput(${i}, '${cat}')">${d}</div></td>`;
             }).join('')}</tr>`;
         });
-
         if(isUpper) {
-            h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">${calculateValues(i).sum}</td>`).join('')}</tr>`;
-            h += `<tr class="sum-row"><td>± Par</td>${players.map((p, i) => {
+            h += `<tr class="sum-row"><td>Summa</td>${players.map((p, i) => {
                 const v = calculateValues(i);
-                let diff = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
-                return `<td class="${currentPlayerTurn === i ? 'active-col' : ''}" style="color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">${diff}</td>`;
+                let diffText = v.diff === 0 ? "par" : (v.diff > 0 ? "+" + v.diff : v.diff);
+                return `<td style="font-weight:bold">${v.sum} <span style="font-size:9px; opacity:0.8; color:${v.diff < 0 ? '#ff3b30' : '#34c759'}">(${diffText})</span></td>`;
             }).join('')}</tr>`;
-            h += `<tr class="bonus-row"><td>Bonus</td>${players.map((p, i) => `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">${calculateValues(i).bonus}</td>`).join('')}</tr>`;
-        } else {
-            h += `<tr class="total-row"><td>TOTALT</td>${players.map((p, i) => `<td class="${currentPlayerTurn === i ? 'active-col' : ''}">${calculateValues(i).total}</td>`).join('')}</tr>`;
-        }
-        return h + "</tbody>";
+            h += renderStaticRow("Bonus", "bonus", "sum-row");
+        } else { h += renderStaticRow("TOTALT", "total", "total-row"); }
+        return h + `</tbody>`;
     };
-
     document.getElementById('tableUpper').innerHTML = renderTable(upperCats, true);
     document.getElementById('tableLower').innerHTML = renderTable(lowerCats, false);
-    updatePrognosis();
-    checkGameOver();
+    checkGameStatus(); updatePrognosis();
 }
 
-function openInput(pIdx, cat) {
-    if (pIdx !== currentPlayerTurn && !confirm(`Varning: Det är ${players[currentPlayerTurn].name}s tur. Fortsätt ändå?`)) return;
-    if (players[pIdx].scores[cat] !== undefined && !confirm(`Det finns redan poäng här. Vill du skriva över?`)) return;
-
-    activePIdx = pIdx; activeCat = cat;
-    document.getElementById('modalHeader').innerHTML = `<div class="modal-cat-name">${cat}</div><div class="modal-player-name">${players[pIdx].name}</div>`;
-    
-    document.getElementById('overlayInput').style.display = 'block';
-    document.getElementById('modalInput').style.display = 'block';
-
-    const diceWrap = document.getElementById('dice-input-wrap');
-    const ladderWrap = document.getElementById('ladder-input-wrap');
-    const numWrap = document.getElementById('numeric-input-wrap');
-    
-    diceWrap.style.display = 'none'; ladderWrap.style.display = 'none'; numWrap.style.display = 'none';
-
-    if (upperCats.includes(cat)) {
-        diceWrap.style.display = 'block';
-        renderDiceHorizontal(upperCats.indexOf(cat) + 1, 5);
-    } else if (["Ett par", "Triss", "Fyrtal"].includes(cat)) {
-        diceWrap.style.display = 'block';
-        renderSpecialDiceHorizontal(cat);
-    } else if (cat.includes("stege") || cat === "Yatzy") {
-        ladderWrap.style.display = 'block';
-        document.getElementById('ladderArt').innerText = cat === "Liten stege" ? "1 2 3 4 5" : (cat === "Stor stege" ? "2 3 4 5 6" : "⚄ ⚄ ⚄ ⚄ ⚄");
-        document.getElementById('ladderPoints').innerText = cat === "Liten stege" ? "15p" : (cat === "Stor stege" ? "20p" : "50p");
-    } else {
-        numWrap.style.display = 'block';
-        currentNumInput = "";
-        document.getElementById('num-display').innerText = "-";
-    }
+function checkGameStatus() {
+    const allFinished = players.every(p => Object.keys(p.scores).length === 15);
+    document.getElementById('mainFooter').style.display = allFinished ? 'block' : 'none';
 }
 
-function renderDiceHorizontal(dieVal, max) {
-    const grid = document.getElementById('diceGrid');
-    let h = `<div class="dice-card zero" onclick="setScoreAndClose(0)"><span class="dice-icon">❌</span><b class="dice-val">0</b></div>`;
-    for (let i = 1; i <= max; i++) {
-        h += `<div class="dice-card" onclick="setScoreAndClose(${i * dieVal})">
-            <span class="dice-icon">${diceIcons[dieVal].repeat(i < 4 ? i : 3)}${i > 3 ? '<br>'+diceIcons[dieVal].repeat(i-3) : ''}</span>
-            <b class="dice-val">${i * dieVal}</b>
-        </div>`;
-    }
-    grid.innerHTML = h;
-}
-
-function renderSpecialDiceHorizontal(cat) {
-    const grid = document.getElementById('diceGrid');
-    let h = `<div class="dice-card zero" onclick="setScoreAndClose(0)"><span class="dice-icon">❌</span><b class="dice-val">0</b></div>`;
-    let count = cat === "Ett par" ? 2 : (cat === "Triss" ? 3 : 4);
-    for (let v = 1; v <= 6; v++) {
-        h += `<div class="dice-card" onclick="setScoreAndClose(${v * count})">
-            <span class="dice-icon">${diceIcons[v].repeat(count)}</span>
-            <b class="dice-val">${v * count}</b>
-        </div>`;
-    }
-    grid.innerHTML = h;
-}
-
-function handleLadderSuccess() {
-    let s = 0;
-    if (activeCat === "Liten stege") s = 15;
-    else if (activeCat === "Stor stege") s = 20;
-    else if (activeCat === "Yatzy") s = 50;
-    setScoreAndClose(s);
-}
-
-function pressNum(v) {
-    if (v === 'C') currentNumInput = ""; 
-    else if (currentNumInput.length < 2) currentNumInput += v;
-    document.getElementById('num-display').innerText = currentNumInput || "-";
-    
-    if (currentNumInput.length === 1 && parseInt(v) >= 5) confirmNumeric();
-    else if (currentNumInput.length === 2) confirmNumeric();
-}
-
-function confirmNumeric() {
-    const val = parseInt(currentNumInput);
-    if (!isNaN(val)) setScoreAndClose(val);
-}
-
-function setScoreAndClose(score) {
-    if (score === null) {
-        delete players[activePIdx].scores[activeCat];
-    } else {
-        players[activePIdx].scores[activeCat] = score;
-        lastChangedCell = { pIdx: activePIdx, cat: activeCat };
-        if(options.tv) triggerTvPopup(score, players[activePIdx].name);
-        currentPlayerTurn = (activePIdx + 1) % players.length;
-    }
-    localStorage.setItem('statzy_scores', JSON.stringify(players));
-    closeModal();
-    renderBoard();
-}
-
-function triggerTvPopup(score, name) {
-    const el = document.getElementById('tv-popup');
-    const em = document.getElementById('tv-emoji');
-    const nm = document.getElementById('tv-name');
-    
-    let emo = "👍";
-    if (score === 0) emo = "💀";
-    else if (score >= 50) emo = "👑";
-    else if (score >= 20) emo = "🔥";
-    
-    em.innerText = emo;
-    nm.innerText = name;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 1800);
+function renderStaticRow(label, type, className) {
+    return `<tr class="${className}"><td>${label}</td>${players.map((p, i) => `<td style="font-weight:bold">${calculateValues(i)[type]}</td>`).join('')}</tr>`;
 }
 
 function calculateValues(pIdx) {
@@ -363,34 +319,87 @@ function calculateValues(pIdx) {
     return { sum, bonus, total, diff };
 }
 
+function openInput(pIdx, cat) {
+    activePIdx = pIdx; activeCat = cat;
+    const currentScore = players[pIdx].scores[cat];
+    const isNumeric = ["Två par", "Kåk", "Chans"].includes(cat);
+    document.getElementById('modalInputTitle').innerHTML = `<div class="modal-cat-name">${cat}</div><div class="modal-player-name">${players[pIdx].name}</div>`;
+    document.getElementById('modalInput').style.display = 'block';
+    document.getElementById('overlayInput').style.display = 'block';
+    document.getElementById('quick-pick-section').style.display = isNumeric ? 'none' : 'block';
+    document.getElementById('numeric-section').style.display = isNumeric ? 'block' : 'none';
+    if (!isNumeric) {
+        const grid = document.getElementById('quickGrid'); grid.innerHTML = "";
+        let opts = [0];
+        if (upperCats.includes(cat)) { const v = upperCats.indexOf(cat)+1; for(let j=1; j<=5; j++) opts.push(v*j); }
+        else if (cat === "Ett par") [2,4,6,8,10,12].forEach(v => opts.push(v));
+        else if (cat === "Triss") [3,6,9,12,15,18].forEach(v => opts.push(v));
+        else if (cat === "Fyrtal") [4,8,12,16,20,24].forEach(v => opts.push(v));
+        else if (cat === "Liten stege") opts.push(15); else if (cat === "Stor stege") opts.push(20); else if (cat === "Yatzy") opts.push(50);
+        opts.sort((a,b)=>a-b).forEach(o => {
+            const b = document.createElement('div'); b.className = 'quick-btn' + (currentScore === o ? ' already-selected' : '');
+            b.innerText = o === 0 ? "/" : o; b.onclick = () => setScoreAndClose(o); grid.appendChild(b);
+        });
+    } else { currentNumInput = currentScore !== undefined ? currentScore.toString() : ""; document.getElementById('num-display').innerText = currentNumInput || "-"; }
+}
+
+function pressNum(v) {
+    if (v === 'C') currentNumInput = ""; else if (currentNumInput.length < 2) currentNumInput += v;
+    document.getElementById('num-display').innerText = currentNumInput || "-";
+    const firstDigit = parseInt(currentNumInput[0]);
+    if (currentNumInput.length === 1 && firstDigit >= 5) confirmNumeric();
+    else if (currentNumInput.length === 2 && [0,1,2,3,4].includes(firstDigit)) confirmNumeric();
+}
+
+function confirmNumeric() {
+    if (currentNumInput === "") return;
+    const val = parseInt(currentNumInput);
+    let min = 0, max = 30;
+    if (activeCat === "Två par") { min = 6; max = 22; }
+    if (activeCat === "Kåk") { min = 7; max = 28; }
+    if (isNaN(val) || val < min || val > max) { document.getElementById('err-msg').innerText = `Ogiltigt!`; } 
+    else { setScoreAndClose(val); }
+}
+
+function setScoreAndClose(v) {
+    if (v === null) { delete players[activePIdx].scores[activeCat]; lastChangedCell = { pIdx: null, cat: null }; }
+    else { players[activePIdx].scores[activeCat] = v; lastChangedCell = { pIdx: activePIdx, cat: activeCat }; }
+    saveScores(); closeModal(); renderBoard();
+}
+
+function closeModal() { document.getElementById('modalInput').style.display = 'none'; document.getElementById('overlayInput').style.display = 'none'; document.getElementById('err-msg').innerText = "";}
+
 function updatePrognosis() {
+    const iter = 3000;
+    let wins = new Array(players.length).fill(0);
+    for (let i = 0; i < iter; i++) {
+        let simScores = players.map(p => {
+            let s = 0, uSum = 0;
+            upperCats.forEach(c => { let v = p.scores[c] !== undefined ? p.scores[c] : simulate(c, true); uSum += v; s += v; });
+            if (uSum >= 63) s += 50;
+            lowerCats.forEach(c => s += (p.scores[c] !== undefined ? p.scores[c] : simulate(c, false)));
+            return s;
+        });
+        wins[simScores.indexOf(Math.max(...simScores))]++;
+    }
     const bar = document.getElementById('probBar'); bar.innerHTML = "";
-    let totals = players.map((p, i) => calculateValues(i).total + 10);
-    let sumTotal = totals.reduce((a, b) => a + b, 0);
     players.forEach((p, i) => {
-        let pct = (totals[i] / sumTotal) * 100;
-        bar.innerHTML += `<div class="prob-seg" style="width:${pct}%; background:${p.color}">${Math.round(pct)}%</div>`;
+        const pct = (wins[i] / iter) * 100;
+        const div = document.createElement('div'); div.className = "prob-seg";
+        div.style.width = pct + "%"; div.style.backgroundColor = p.color;
+        div.innerText = pct > 12 ? Math.round(pct) + "%" : "";
+        bar.appendChild(div);
     });
 }
 
-function closeModal() { document.getElementById('overlayInput').style.display = 'none'; document.getElementById('modalInput').style.display = 'none'; }
-function openSettings() { document.getElementById('modalSettings').style.display = 'block'; document.getElementById('overlaySettings').style.display = 'block'; }
-function closeSettings() { document.getElementById('modalSettings').style.display = 'none'; document.getElementById('overlaySettings').style.display = 'none'; }
-function toggleOption(opt) { 
-    options[opt] = !options[opt]; 
-    document.getElementById('tvToggle').innerText = options.tv ? "PÅ" : "AV";
-    document.getElementById('tvToggle').style.background = options.tv ? "var(--win)" : "#333";
-    document.body.classList.toggle('mode-tv', options.tv);
-    renderBoard();
-}
-function setZoom(z) { document.body.className = z; }
-function nextRound() { if(confirm("Nollställa och börja om?")) { localStorage.removeItem('statzy_scores'); location.reload(); } }
-
-function checkGameOver() {
-    const isDone = players.every(p => Object.keys(p.scores).length === 15);
-    document.getElementById('mainFooter').style.display = isDone ? 'block' : 'none';
+function simulate(cat, isUpper) {
+    const r = Math.random();
+    if (isUpper) { const val = upperCats.indexOf(cat) + 1; if (val >= 4 && r > 0.75) return val * 4; return r > 0.4 ? val * 3 : 0; }
+    switch(cat) {
+        case "Yatzy": return r < 0.05 ? 50 : 0; case "Liten stege": return r < 0.6 ? 15 : 0; case "Stor stege": return r < 0.5 ? 20 : 0;
+        case "Kåk": return r < 0.4 ? 24 : 0; case "Två par": return r < 0.8 ? 16 : 0; case "Chans": return 22; default: return 12;
+    }
 }
 </script>
-
 </body>
 </html>
